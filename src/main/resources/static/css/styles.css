@@ -1,0 +1,117 @@
+/* --- ESTILOS ESPECÍFICOS PARA AUTH (LOGIN/REGISTER) --- */
+
+/* Fondo especial para login/registro con un sutil destello rosa */
+.auth-body {
+    background-color: var(--bg-body);
+    background-image: radial-gradient(circle at top right, rgba(255, 45, 85, 0.05), transparent 40%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-container {
+    flex-grow: 1; /* Ocupa el espacio restante bajo el navbar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 440px;
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    /* Sombra suave para darle profundidad */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-title {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+/* Selector de Roles estilo Pill (Pastilla) */
+.role-selector {
+    display: flex;
+    background-color: #27272a; /* Fondo oscuro del input */
+    padding: 4px;
+    border-radius: 8px; /* Bordes suaves */
+    margin-bottom: 5px;
+    border: 1px solid var(--border);
+}
+
+.role-option {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 6px; /* Bordes interiores */
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.role-option:hover {
+    color: var(--text-main);
+}
+
+/* El botón seleccionado se enciende con tu color principal */
+.role-option.active {
+    background-color: var(--primary);
+    color: white;
+    /* Sombra sutil del color primario */
+    box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
+}
+
+/* Enlaces del pie del formulario */
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.auth-link:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+.error-msg {
+    background-color: rgba(255, 45, 85, 0.1);
+    color: var(--primary);
+    border: 1px solid rgba(255, 45, 85, 0.3);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+    display: none;
+    text-align: center;
+}
