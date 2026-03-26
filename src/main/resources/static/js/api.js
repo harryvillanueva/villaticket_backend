@@ -1,5 +1,5 @@
 // js/api.js
-const API_URL = 'http://localhost:8080/api/v1'; // Ajusta esto a la ruta real de tu Backend
+const API_URL = 'http://localhost:8080/api'; // Ajusta esto a la ruta real de tu Backend
 
 // Función genérica para hacer peticiones JSON
 async function fetchAPI(endpoint, method = 'GET', body = null) {
