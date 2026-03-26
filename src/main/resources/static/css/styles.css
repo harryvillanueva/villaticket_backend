@@ -115,3 +115,583 @@
     display: none;
     text-align: center;
 }
+
+
+/*------- diseños de eliminar despues --------------*/
+
+:root {
+    /* Paleta Oscura inspirada en Joinnus pero Dark */
+    --bg-body: #121212;        /* Fondo muy oscuro */
+    --bg-card: #1e1e1e;        /* Tarjetas un poco más claras */
+    --bg-header: #18181b;      /* Header sólido */
+
+    /* Colores de Acento */
+    --primary: #ff2d55;        /* El Rojo/Rosa Joinnus vibrante */
+    --primary-hover: #e01b42;
+
+    /* Textos */
+    --text-main: #ffffff;
+    --text-muted: #a1a1aa;
+
+    /* Bordes y UI */
+    --border: #3f3f46;
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif; /* Tipografía moderna */
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background-color: var(--bg-header);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 0.8rem 0;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+/* Barra de Búsqueda estilo Joinnus */
+.search-bar {
+    background-color: #27272a;
+    border-radius: 50px;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    width: 40%;
+    border: 1px solid transparent;
+    transition: 0.3s;
+}
+
+.search-bar:focus-within {
+    border-color: var(--primary);
+    background-color: #000;
+}
+
+.search-bar input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: white;
+    margin-left: 10px;
+    width: 100%;
+}
+
+.search-bar .material-icons-outlined {
+    color: var(--text-muted);
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.nav-item {
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.nav-item:hover { color: var(--primary); }
+
+.btn {
+    padding: 8px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.btn-text { color: var(--text-main); }
+.btn-text:hover { color: var(--primary); }
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+}
+
+/* --- HERO --- */
+.hero-section {
+    height: 350px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), var(--bg-body)),
+                url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* --- FILTERS / CHIPS --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.filters-section {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    margin-top: -30px; /* Efecto flotante sobre el hero */
+    position: relative;
+    z-index: 10;
+}
+
+.chip {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.3s;
+}
+
+.chip:hover, .chip.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* --- GRID CARDS --- */
+.section-title {
+    margin: 30px 0 20px 0;
+    font-size: 1.8rem;
+}
+
+.grid-eventos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive Grid */
+    gap: 24px;
+}
+
+/* Tarjeta estilo Joinnus Dark */
+.card-evento {
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 1px solid transparent;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-evento:hover {
+    transform: translateY(-5px);
+    border-color: var(--border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.card-image-wrapper {
+    position: relative;
+    height: 180px;
+}
+
+.card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Badge de fecha sobre la imagen */
+.date-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    backdrop-filter: blur(4px);
+}
+
+.date-day { font-size: 1.1rem; display: block; }
+.date-month { text-transform: uppercase; color: var(--primary); }
+
+.card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.card-category {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1.4;
+    color: var(--text-main);
+}
+
+.card-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+}
+
+.card-footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.price-tag {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.price-amount {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.btn-buy-card {
+    background-color: transparent;
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.btn-buy-card:hover {
+    background-color: var(--text-main);
+    color: black;
+}
+
+/* --- FOOTER --- */
+.footer {
+    background-color: var(--bg-header);
+    margin-top: 60px;
+    padding: 40px 0 20px 0;
+    border-top: 1px solid var(--border);
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+}
+
+.footer-col h3, .footer-col h4 {
+    color: var(--text-main);
+    margin-bottom: 15px;
+}
+
+.footer-col a {
+    display: block;
+    color: var(--text-muted);
+    text-decoration: none;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.footer-col a:hover { color: var(--primary); }
+
+.copyright {
+    text-align: center;
+    margin-top: 40px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .nav-links, .search-bar { display: none; } /* En móvil simplificamos */
+    .hero-content h1 { font-size: 2rem; }
+}
+
+/* --- ESTILOS DE AUTENTICACIÓN (LOGIN/REGISTER) --- */
+
+.auth-body {
+    background-image: radial-gradient(circle at top right, rgba(255, 45, 85, 0.1), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(108, 92, 231, 0.1), transparent 40%);
+}
+
+.auth-container {
+    min-height: calc(100vh - 140px); /* Restamos header/footer aprox */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: var(--bg-card);
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-title {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+}
+
+/* Campos de Formulario */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    background-color: #27272a; /* Input oscuro */
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 45, 85, 0.2);
+}
+
+/* Selector de Rol (Cliente vs Vendedor) */
+.role-selector {
+    display: flex;
+    background-color: #27272a;
+    padding: 5px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+}
+
+.role-option {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: 0.3s;
+    user-select: none; /* Evita que se seleccione el texto */
+}
+
+/* La clase .active se pone con JS */
+.role-option.active {
+    background-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 10px rgba(255, 45, 85, 0.4);
+}
+
+/* Footer del Formulario */
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.auth-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link:hover { text-decoration: underline; }
+
+/* Mensaje de Error */
+.error-msg {
+    color: #ff4757;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: none; /* Se muestra con JS */
+}
+
+/* --- ESTILOS CREAR EVENTO --- */
+.upload-area {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    background-color: rgba(255,255,255,0.02);
+}
+
+.upload-area:hover {
+    border-color: var(--primary);
+    background-color: rgba(255, 45, 85, 0.05);
+}
+
+.upload-icon { font-size: 3rem; color: var(--text-muted); margin-bottom: 10px; }
+
+/* --- ESTILOS MIS TICKETS (El diseño "Entrada Real") --- */
+.ticket-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ticket-card-real {
+    display: flex;
+    background-color: var(--bg-card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    position: relative;
+    height: 200px;
+    transition: 0.3s;
+}
+
+.ticket-card-real:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: translateX(5px);
+}
+
+/* Parte Izquierda (Info Evento) */
+.ticket-left {
+    flex: 1; /* Ocupa todo el espacio posible */
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-right: 2px dashed #3f3f46; /* Línea de corte */
+    position: relative;
+}
+
+/* Los "mordiscos" o agujeros del ticket */
+.ticket-left::after, .ticket-left::before {
+    content: '';
+    position: absolute;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background-color: var(--bg-body); /* Color del fondo de la web */
+    border-radius: 50%;
+}
+.ticket-left::before { top: -10px; }
+.ticket-left::after { bottom: -10px; }
+
+.ticket-event-title { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;}
+.ticket-meta { color: var(--text-muted); margin-bottom: 5px; display: flex; align-items: center; gap: 5px;}
+
+/* Parte Derecha (QR) */
+.ticket-right {
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white; /* El QR necesita contraste */
+    padding: 10px;
+    flex-shrink: 0;
+}
+
+/* ESTADO DEL TICKET (Badge) */
+.ticket-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-top: 10px;
+}
+.status-valid { background-color: rgba(0, 184, 148, 0.2); color: #00b894; border: 1px solid #00b894;}
+.status-used { background-color: rgba(255, 255, 255, 0.1); color: #b2bec3; border: 1px solid #636e72;}
+
+/* Responsive para tickets */
+@media (max-width: 768px) {
+    .ticket-card-real { flex-direction: column; height: auto; }
+    .ticket-left { border-right: none; border-bottom: 2px dashed #3f3f46; }
+    .ticket-right { width: 100%; padding: 20px; }
+    /* Ajuste agujeros */
+    .ticket-left::after, .ticket-left::before { right: auto; left: -10px; } /* Simplificado para móvil */
+}
