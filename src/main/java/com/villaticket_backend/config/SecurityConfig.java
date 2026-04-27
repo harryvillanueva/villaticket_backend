@@ -11,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import java.util.Arrays;
 
@@ -21,11 +22,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-
                         .requestMatchers(
                                 "/",
                                 "/*.html",
@@ -34,16 +33,10 @@ public class SecurityConfig {
                                 "/img/**",
                                 "/assets/**"
                         ).permitAll()
-
-                        // -- ENDPOINTS DE API (Públicos) --
-                        // IMPORTANTE: Asegúrate de que esta ruta coincida con el @RequestMapping de tu RegisterUserController
-                        .requestMatchers("/api/v1/users/register", "/api/v1/auth/login").permitAll()
-
-                        // -- TODO LO DEMÁS -- (Requiere estar logueado con Token)
+                        // Permitimos tanto el registro como el login
+                        .requestMatchers("/api/users/**", "/api/auth/**").permitAll()
                         .anyRequest().authenticated()
                 )
-
-                // 3. Decirle a Spring que no use sesiones tradicionales (Cookies), porque usaremos JWT (Stateless)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
@@ -52,7 +45,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // Permite cualquier origen (localhost, etc)
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
 
@@ -61,7 +54,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // Bean para encriptar contraseñas (Lo usamos en el RegisterUser.java)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
