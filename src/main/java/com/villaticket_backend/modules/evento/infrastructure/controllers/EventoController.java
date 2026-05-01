@@ -1,12 +1,9 @@
 package com.villaticket_backend.modules.evento.infrastructure.controllers;
 
 import com.villaticket_backend.modules.evento.application.dtos.CrearEventoRequest;
+import com.villaticket_backend.modules.evento.application.dtos.EditarEventoRequest;
 import com.villaticket_backend.modules.evento.application.dtos.EventoDTO;
-import com.villaticket_backend.modules.evento.application.use_cases.CrearEvento;
-import com.villaticket_backend.modules.evento.application.use_cases.ListarEventos;
-import com.villaticket_backend.modules.evento.application.use_cases.ObtenerEvento;
-import com.villaticket_backend.modules.evento.application.use_cases.PublicarEvento;
-import com.villaticket_backend.modules.evento.application.use_cases.ListarCategorias;
+import com.villaticket_backend.modules.evento.application.use_cases.*;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.CategoriaEntity;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.EventoEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +30,7 @@ public class EventoController {
 
     @Autowired
     private ListarCategorias listarCategorias; // Inyectamos el caso de uso
+    @Autowired private EditarEvento editarEvento; // NUEVO
 
     // Endpoint: Carga la cartelera pública
     @GetMapping
@@ -74,5 +72,9 @@ public class EventoController {
     public ResponseEntity<EventoEntity> publicar(@PathVariable Long id) {
         EventoEntity eventoPublicado = publicarEvento.ejecutar(id);
         return ResponseEntity.ok(eventoPublicado);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<EventoEntity> editar(@PathVariable Long id, @RequestBody EditarEventoRequest request) {
+        return ResponseEntity.ok(editarEvento.ejecutar(id, request));
     }
 }

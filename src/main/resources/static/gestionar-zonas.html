@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Villaticket - Gestionar Zonas</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
@@ -11,41 +12,57 @@
 <nav class="navbar">
     <div class="nav-container">
         <a href="dashboard-vendedor.html" class="logo-area" style="text-decoration: none;">
-            <span>⬅️</span> Volver al Dashboard
+            <span>🎫</span> Volver al Panel
         </a>
+        <div class="nav-links">
+            <a href="#" class="nav-item" id="btnCerrarSesion" style="color: #ff4757;">Cerrar sesión</a>
+        </div>
     </div>
 </nav>
 
-<div class="container" style="margin-top: 40px; display: flex; gap: 30px; flex-wrap: wrap;">
+<div class="container" style="margin-top: 40px; padding-bottom: 50px;">
 
-    <div class="auth-card" style="flex: 1; min-width: 300px;">
-        <h2 class="auth-title" style="text-align: left;">Añadir Zona</h2>
-        <p class="auth-subtitle" style="text-align: left;">Define las tarifas y aforo de tu evento.</p>
+    <!-- Formulario para Crear / Editar Zona -->
+    <div class="auth-card" style="max-width: 800px; margin: 0 auto 30px auto;">
+        <h2 class="auth-title" id="tituloFormulario">Añadir Nueva Zona</h2>
+        <p class="auth-subtitle">Define las áreas, aforo y precios para tu evento.</p>
 
-        <form id="crearZonaForm">
-            <div class="form-group">
-                <label class="form-label">Nombre de la Zona</label>
-                <input type="text" id="nombreZona" class="form-control" required placeholder="Ej. VIP, Platea, General">
+        <form id="formCrearZona" style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+            <div class="form-group" style="flex: 1; min-width: 200px;">
+                <label class="form-label">Nombre de Zona (Ej: VIP)</label>
+                <input type="text" id="nombreZona" class="form-control" required>
             </div>
-            <div class="form-group">
-                <label class="form-label">Capacidad (Nº de Entradas)</label>
-                <input type="number" id="capacidadZona" class="form-control" required placeholder="Ej. 100" min="1">
+            <div class="form-group" style="flex: 1; min-width: 150px;">
+                <label class="form-label">Capacidad Total</label>
+                <input type="number" id="capacidadZona" class="form-control" min="1" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="flex: 1; min-width: 150px;">
                 <label class="form-label">Precio (€)</label>
-                <input type="number" id="precioZona" class="form-control" required placeholder="Ej. 45.50" step="0.01" min="0">
+                <input type="number" id="precioZona" class="form-control" min="0" step="0.01" required>
             </div>
-            <div id="zonaError" class="error-msg"></div>
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Guardar Zona</button>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <button type="submit" class="btn btn-primary" id="btnSubmitZona">Añadir Zona</button>
+            </div>
         </form>
     </div>
 
-    <div class="auth-card" style="flex: 2; min-width: 300px; background: transparent; border: none; box-shadow: none; padding: 0;">
-        <h2 class="auth-title" style="text-align: left;">Zonas Actuales</h2>
-        <div id="listaZonas" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
-        </div>
+    <!-- Tabla de Zonas -->
+    <div class="auth-card" style="max-width: 800px; margin: 0 auto; padding: 20px;">
+        <h3 style="color: white; margin-bottom: 15px;">Zonas Actuales</h3>
+        <table style="width: 100%; color: white; text-align: left; border-collapse: collapse;">
+            <thead>
+            <tr style="border-bottom: 1px solid #444;">
+                <th style="padding: 10px;">Zona</th>
+                <th style="padding: 10px;">Aforo</th>
+                <th style="padding: 10px;">Precio</th>
+                <th style="padding: 10px;">Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="tbodyZonas">
+            <!-- Se llena con JS -->
+            </tbody>
+        </table>
     </div>
-
 </div>
 
 <script src="js/api.js"></script>

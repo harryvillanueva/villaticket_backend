@@ -6,6 +6,8 @@ public class CrearZonaRequest {
     private String nombre;
     private Integer capacidad;
     private BigDecimal precio;
+    private Integer capacidadTotal;
+    private Integer capacidadActual;
 
     public CrearZonaRequest() {}
 
@@ -15,4 +17,20 @@ public class CrearZonaRequest {
     public void setCapacidad(Integer capacidad) { this.capacidad = capacidad; }
     public BigDecimal getPrecio() { return precio; }
     public void setPrecio(BigDecimal precio) { this.precio = precio; }
+
+    public Integer getCapacidadTotal() {
+        return capacidadTotal;
+    }
+
+    public void setCapacidadTotal(Integer capacidadTotal) {
+        this.capacidadTotal = capacidadTotal;
+    }
+
+    public Integer getCapacidadActual() {
+        return capacidadActual;
+    }
+
+    public void setCapacidadActual(Integer capacidadActual) {
+        this.capacidadActual = capacidadActual;
+    }
 }
