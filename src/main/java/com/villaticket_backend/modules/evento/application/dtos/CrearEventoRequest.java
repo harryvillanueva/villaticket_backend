@@ -10,8 +10,7 @@ public class CrearEventoRequest {
     private String imagen;
     private Long categoriaId;
     private String emailVendedor; // Usamos el email para identificar qué vendedor lo crea
-    private String descripcion;
-    private List<String> galeria;
+
 
     public CrearEventoRequest() {}
 
@@ -31,19 +30,5 @@ public class CrearEventoRequest {
     public String getEmailVendedor() { return emailVendedor; }
     public void setEmailVendedor(String emailVendedor) { this.emailVendedor = emailVendedor; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public List<String> getGaleria() {
-        return galeria;
-    }
-
-    public void setGaleria(List<String> galeria) {
-        this.galeria = galeria;
-    }
 }

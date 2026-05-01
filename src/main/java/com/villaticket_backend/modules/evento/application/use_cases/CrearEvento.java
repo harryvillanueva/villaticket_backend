@@ -42,8 +42,6 @@ public class CrearEvento {
         evento.setHora(LocalTime.parse(request.getHora()));
         evento.setUbicacion(request.getUbicacion());
         evento.setImagen(request.getImagen());
-        evento.setDescripcion(request.getDescripcion()); // NUEVO
-        evento.setGaleria(request.getGaleria()); // NUEVO
         evento.setEstado("PUBLICADO"); // Por defecto lo publicamos directamente
 
         evento.setCategoria(categoria);

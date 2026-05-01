@@ -6,7 +6,6 @@ import com.villaticket_backend.modules.evento.application.dtos.EventoDTO;
 import com.villaticket_backend.modules.evento.application.use_cases.CrearEvento;
 import com.villaticket_backend.modules.evento.application.use_cases.ListarCategorias;
 import com.villaticket_backend.modules.evento.application.use_cases.ListarEventos;
-import com.villaticket_backend.modules.evento.application.use_cases.ObtenerEvento;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +28,7 @@ public class EventoController {
     @Autowired
     private ListarEventos listarEventos;
 
-    @Autowired
-    private ObtenerEvento obtenerEvento;
+
 
     @GetMapping
     public ResponseEntity<List<EventoDTO>> getEventosPublicados() {
@@ -61,8 +59,4 @@ public class EventoController {
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<EventoDTO> getEventoPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(obtenerEvento.execute(id));
-    }
 }

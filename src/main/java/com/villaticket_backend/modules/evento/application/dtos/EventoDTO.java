@@ -13,10 +13,9 @@ public class EventoDTO {
     private String imagen;
     private String nombreCategoria;
     private String estado;
-    private String descripcion;
-    private List<String> galeria;
 
-    public EventoDTO(Long id, String titulo, LocalDate fecha, LocalTime hora, String ubicacion, String imagen, String nombreCategoria, String estado, String descripcion, List galeria) {
+
+    public EventoDTO(Long id, String titulo, LocalDate fecha, LocalTime hora, String ubicacion, String imagen, String nombreCategoria, String estado) {
         this.id = id;
         this.titulo = titulo;
         this.fecha = fecha;
@@ -25,12 +24,10 @@ public class EventoDTO {
         this.imagen = imagen;
         this.nombreCategoria = nombreCategoria;
         this.estado = estado;
-        this.descripcion=descripcion;
-        this.galeria = galeria;
+
     }
 
-    public EventoDTO(Long id, String titulo, LocalDate fecha, LocalTime hora, String ubicacion, String imagen, String nombre, String estado) {
-    }
+
 
     // Getters
     public Long getId() { return id; }
@@ -42,13 +39,6 @@ public class EventoDTO {
     public String getNombreCategoria() { return nombreCategoria; }
     public String getEstado() { return estado; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
 
-
-    public List<String> getGaleria() {
-        return galeria;
-    }
 
 }
