@@ -3,12 +3,15 @@ package com.villaticket_backend.modules.evento.application.use_cases;
 import com.villaticket_backend.modules.evento.application.dtos.CrearEventoRequest;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.CategoriaEntity;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.EventoEntity;
+import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.ImagenEventoEntity;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaCategoriaRepository;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaEventoRepository;
+import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaImagenEventoRepository;
 import com.villaticket_backend.modules.user.infrastructure.persistence.entities.UsuarioEntity;
 import com.villaticket_backend.modules.user.infrastructure.persistence.jpa.JpaUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,29 +28,46 @@ public class CrearEvento {
     @Autowired
     private JpaUsuarioRepository usuarioRepository;
 
-    public void execute(CrearEventoRequest request) {
-        // 1. Validar que el vendedor existe
-        UsuarioEntity vendedor = usuarioRepository.findByEmail(request.getEmailVendedor())
-                .orElseThrow(() -> new RuntimeException("Vendedor no encontrado con el email: " + request.getEmailVendedor()));
+    @Autowired
+    private JpaImagenEventoRepository imagenEventoRepository;
 
-        // 2. Validar que la categoría existe
+    @Transactional // Garantiza que si algo falla, no se guarde nada a medias
+    public EventoEntity ejecutar(CrearEventoRequest request) {
+
+        // 1. Buscamos al vendedor y la categoría
+        UsuarioEntity vendedor = usuarioRepository.findByEmail(request.getVendedorEmail())
+                .orElseThrow(() -> new RuntimeException("Vendedor no encontrado"));
+
         CategoriaEntity categoria = categoriaRepository.findById(request.getCategoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada."));
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
-        // 3. Crear la entidad Evento
+        // 2. Preparamos el evento (asegúrate de que EventoEntity tenga los setters creados manualmente)
         EventoEntity evento = new EventoEntity();
         evento.setTitulo(request.getTitulo());
-        // Convertimos los Strings a objetos de Fecha y Hora de Java
+        evento.setDescripcion(request.getDescripcion());
         evento.setFecha(LocalDate.parse(request.getFecha()));
         evento.setHora(LocalTime.parse(request.getHora()));
         evento.setUbicacion(request.getUbicacion());
         evento.setImagen(request.getImagen());
-        evento.setEstado("PUBLICADO"); // Por defecto lo publicamos directamente
-
-        evento.setCategoria(categoria);
+        evento.setEstado("BORRADOR");
         evento.setVendedor(vendedor);
+        evento.setCategoria(categoria);
 
-        // 4. Guardar en la base de datos
-        eventoRepository.save(evento);
+        // 3. Guardamos el evento para generar su ID
+        EventoEntity eventoGuardado = eventoRepository.save(evento);
+
+        // 4. Guardamos la galería de imágenes si el usuario envió alguna
+        if (request.getGaleria() != null && !request.getGaleria().isEmpty()) {
+            int orden = 1;
+            for (String urlImagen : request.getGaleria()) {
+                ImagenEventoEntity imgEntity = new ImagenEventoEntity();
+                imgEntity.setUrlImagen(urlImagen);
+                imgEntity.setOrden(orden++);
+                imgEntity.setEvento(eventoGuardado);
+                imagenEventoRepository.save(imgEntity);
+            }
+        }
+
+        return eventoGuardado;
     }
 }

@@ -1,46 +1,48 @@
-package com.villaticket_backend.shared.infrastructure.upload;
+package com.villaticket_backend.shared.infraestructure.upload;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/upload")
 public class UploadController {
 
-    // Carpeta donde se guardarán las imágenes
-    private final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+    // Nombre de la carpeta en la raíz de tu proyecto donde se guardarán las fotos
+    private final String UPLOAD_DIR = "uploads/";
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("El archivo está vacío");
+        }
+
         try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath); // Crea la carpeta si no existe
+            // 1. Crear la carpeta "uploads" si no existe
+            File directorio = new File(UPLOAD_DIR);
+            if (!directorio.exists()) {
+                directorio.mkdirs();
             }
 
-            // Generamos un nombre único para evitar que se sobrescriban imágenes con el mismo nombre
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(fileName);
+            // 2. Generar un nombre único para evitar que fotos con el mismo nombre se sobreescriban
+            String nombreUnico = UUID.randomUUID().toString() + "_" + file.getOriginalFilename().replaceAll(" ", "_");
+            Path rutaDestino = Paths.get(UPLOAD_DIR + nombreUnico);
 
-            // Guardamos el archivo
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            // 3. Copiar el archivo físicamente al servidor
+            Files.copy(file.getInputStream(), rutaDestino);
 
-            // Devolvemos la URL pública con la que el frontend podrá acceder a la imagen
-            Map<String, String> response = new HashMap<>();
-            response.put("url", "/uploads/" + fileName);
-            return ResponseEntity.ok(response);
+            // 4. Devolver la URL estática que usará el frontend
+            return ResponseEntity.ok("/uploads/" + nombreUnico);
 
-        } catch (Exception e) {
-            throw new RuntimeException("Error al guardar la imagen: " + e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body("Error al subir el archivo");
         }
     }
 }

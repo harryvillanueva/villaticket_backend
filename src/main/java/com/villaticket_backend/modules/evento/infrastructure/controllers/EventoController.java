@@ -48,7 +48,7 @@ public class EventoController {
     @PostMapping("/crear")
     public ResponseEntity<Map<String, String>> crearEvento(@RequestBody CrearEventoRequest request) {
         try {
-            crearEvento.execute(request);
+            crearEvento.ejecutar(request);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Evento creado exitosamente.");
             return new ResponseEntity<>(response, HttpStatus.CREATED);
