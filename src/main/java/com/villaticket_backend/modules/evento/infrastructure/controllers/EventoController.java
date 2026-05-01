@@ -1,19 +1,19 @@
 package com.villaticket_backend.modules.evento.infrastructure.controllers;
 
-import com.villaticket_backend.modules.evento.application.dtos.CategoriaDTO;
 import com.villaticket_backend.modules.evento.application.dtos.CrearEventoRequest;
 import com.villaticket_backend.modules.evento.application.dtos.EventoDTO;
 import com.villaticket_backend.modules.evento.application.use_cases.CrearEvento;
-import com.villaticket_backend.modules.evento.application.use_cases.ListarCategorias;
 import com.villaticket_backend.modules.evento.application.use_cases.ListarEventos;
+import com.villaticket_backend.modules.evento.application.use_cases.ObtenerEvento;
+import com.villaticket_backend.modules.evento.application.use_cases.PublicarEvento;
+import com.villaticket_backend.modules.evento.application.use_cases.ListarCategorias;
+import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.CategoriaEntity;
+import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.EventoEntity;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/eventos")
@@ -23,40 +23,56 @@ public class EventoController {
     private CrearEvento crearEvento;
 
     @Autowired
-    private ListarCategorias listarCategorias;
-
-    @Autowired
     private ListarEventos listarEventos;
 
+    @Autowired
+    private ObtenerEvento obtenerEvento;
 
+    @Autowired
+    private PublicarEvento publicarEvento;
 
+    @Autowired
+    private ListarCategorias listarCategorias; // Inyectamos el caso de uso
+
+    // Endpoint: Carga la cartelera pública
     @GetMapping
-    public ResponseEntity<List<EventoDTO>> getEventosPublicados() {
-        return ResponseEntity.ok(listarEventos.publicados());
+    public ResponseEntity<List<EventoDTO>> listarTodosPublicados() {
+        List<EventoDTO> eventos = listarEventos.ejecutarPublicos();
+        return ResponseEntity.ok(eventos);
     }
 
-    @GetMapping("/vendedor/{email}")
-    public ResponseEntity<List<EventoDTO>> getEventosPorVendedor(@PathVariable String email) {
-        return ResponseEntity.ok(listarEventos.porVendedor(email));
-    }
-
+    // NUEVO ENDPOINT: Listar categorías para el formulario
     @GetMapping("/categorias")
-    public ResponseEntity<List<CategoriaDTO>> getCategorias() {
-        return ResponseEntity.ok(listarCategorias.execute());
+    public ResponseEntity<List<CategoriaEntity>> listarCategorias() {
+        List<CategoriaEntity> categorias = listarCategorias.ejecutar();
+        return ResponseEntity.ok(categorias);
     }
 
+    // Crear Evento
     @PostMapping("/crear")
-    public ResponseEntity<Map<String, String>> crearEvento(@RequestBody CrearEventoRequest request) {
-        try {
-            crearEvento.ejecutar(request);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Evento creado exitosamente.");
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<EventoEntity> crearEvento(@RequestBody CrearEventoRequest request) {
+        EventoEntity nuevoEvento = crearEvento.ejecutar(request);
+        return ResponseEntity.ok(nuevoEvento);
     }
 
+    // Listar eventos del vendedor
+    @GetMapping("/vendedor/{email}")
+    public ResponseEntity<List<EventoDTO>> listarPorVendedor(@PathVariable String email) {
+        List<EventoDTO> eventos = listarEventos.ejecutarPorVendedor(email);
+        return ResponseEntity.ok(eventos);
+    }
+
+    // Ver detalles de un evento
+    @GetMapping("/{id}")
+    public ResponseEntity<EventoDTO> obtenerPorId(@PathVariable Long id) {
+        EventoDTO evento = obtenerEvento.ejecutar(id);
+        return ResponseEntity.ok(evento);
+    }
+
+    // Publicar Evento
+    @PutMapping("/{id}/publicar")
+    public ResponseEntity<EventoEntity> publicar(@PathVariable Long id) {
+        EventoEntity eventoPublicado = publicarEvento.ejecutar(id);
+        return ResponseEntity.ok(eventoPublicado);
+    }
 }

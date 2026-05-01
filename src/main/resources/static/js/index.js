@@ -1,70 +1,81 @@
+/**
+ * index.js
+ * Carga la cartelera pública de eventos en la página principal.
+ */
+
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Manejo del Navbar (Auth)
-    const authLinks = document.getElementById('nav-auth-links');
-    const userLinks = document.getElementById('nav-user-links');
-    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
 
+    const contenedorEventos = document.getElementById('eventosGrid');
+
+    // Gestión básica del navbar dependiendo de si el usuario está logueado
+    const navLinks = document.querySelector('.nav-links');
     if (Auth.estaAutenticado()) {
-        authLinks.style.display = 'none';
-        userLinks.style.display = 'flex';
-
-        if(Auth.obtenerRol() === 'VENDEDOR') {
-            const linkPanel = userLinks.querySelector('a');
-            linkPanel.textContent = "Mi Dashboard";
-            linkPanel.href = "dashboard-vendedor.html";
+        const rol = Auth.obtenerRol();
+        if (rol === 'VENDEDOR') {
+            navLinks.innerHTML = `
+                <a href="dashboard-vendedor.html" class="nav-item">Mi Panel</a>
+                <a href="#" class="nav-item" id="btnCerrarSesion" style="color: #ff4757;">Cerrar sesión</a>
+            `;
+        } else if (rol === 'CLIENTE') {
+            navLinks.innerHTML = `
+                <a href="mis-tickets.html" class="nav-item">Mis Entradas</a>
+                <a href="#" class="nav-item" id="btnCerrarSesion" style="color: #ff4757;">Cerrar sesión</a>
+            `;
         }
-    }
 
-    if (btnCerrarSesion) {
-        btnCerrarSesion.addEventListener('click', (e) => {
+        document.getElementById('btnCerrarSesion').addEventListener('click', (e) => {
             e.preventDefault();
             Auth.cerrarSesion();
         });
     }
 
-    // 2. Cargar Eventos desde la API
-    const gridEventos = document.getElementById('eventosGrid');
-
+    // Cargar la cartelera
     try {
-        const eventos = await fetchAPI('/eventos', 'GET');
-        gridEventos.innerHTML = ''; // Limpiamos el grid
+        if (contenedorEventos) {
+            contenedorEventos.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Cargando cartelera...</p>';
 
-        if (eventos.length === 0) {
-            gridEventos.innerHTML = '<p style="color: var(--text-muted);">No hay eventos publicados en este momento.</p>';
-            return;
+            // Llamamos a la API para obtener solo los eventos PUBLICADOS
+            const eventos = await fetchAPI('/eventos', 'GET');
+            contenedorEventos.innerHTML = '';
+
+            if (!eventos || eventos.length === 0) {
+                contenedorEventos.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1/-1;">No hay eventos disponibles en este momento.</p>';
+                return;
+            }
+
+            eventos.forEach(evento => {
+                const id = evento.id;
+                const titulo = evento.titulo || 'Sin título';
+                const fecha = evento.fecha || 'Fecha por definir';
+                const ubicacion = evento.ubicacion || 'Ubicación por definir';
+                const categoria = evento.categoriaNombre || 'General';
+
+                // PREVENCIÓN DEL ERROR /undefined: Validamos que exista una URL real
+                let imagenSrc = evento.imagenUrl || evento.imagen;
+                if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
+                    imagenSrc = 'https://via.placeholder.com/400x250?text=Villaticket';
+                }
+
+                contenedorEventos.innerHTML += `
+                    <article class="card-evento">
+                        <img src="${imagenSrc}" alt="${titulo}" class="card-img" style="height: 200px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x250?text=Error'">
+                        <div class="card-body">
+                            <span class="card-category">${categoria}</span>
+                            <h3 class="card-title">${titulo}</h3>
+                            <p class="card-info">📅 ${fecha}</p>
+                            <p class="card-info">📍 ${ubicacion}</p>
+                            <div class="card-footer" style="margin-top: 15px;">
+                                <a href="detalle-evento.html?id=${id}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 5px;">Ver Detalles</a>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            });
         }
-
-        eventos.forEach(evento => {
-            // Formatear fecha
-            const fecha = new Date(evento.fecha);
-            const dia = fecha.getDate();
-            const mes = fecha.toLocaleString('es-ES', { month: 'short' }).toUpperCase();
-
-            gridEventos.innerHTML += `
-                <article class="card-evento">
-                    <div class="card-image-wrapper">
-                        <div class="date-badge">
-                            <span class="date-day">${dia}</span>
-                            <span class="date-month">${mes}</span>
-                        </div>
-                        <img src="${evento.imagen}" alt="${evento.titulo}" class="card-img">
-                    </div>
-                    <div class="card-body">
-                        <span class="card-category">${evento.nombreCategoria}</span>
-                        <h3 class="card-title">${evento.titulo}</h3>
-                        <div class="card-info">
-                            <span class="material-icons-outlined" style="font-size: 16px;">place</span>
-                            <span>${evento.ubicacion}</span>
-                        </div>
-                        <div class="card-footer">
-                            <div class="price-tag">Hora <br><span style="color: white; font-weight: bold;">${evento.hora.substring(0,5)}</span></div>
-                            <button class="btn-buy-card" onclick="window.location.href='detalle-evento.html?id=${evento.id}'">Ver detalles</button>
-                        </div>
-                    </div>
-                </article>
-            `;
-        });
     } catch (error) {
-        gridEventos.innerHTML = '<p style="color: #ff4757;">Error al cargar la cartelera.</p>';
+        console.error("Error al cargar la cartelera:", error);
+        if (contenedorEventos) {
+            contenedorEventos.innerHTML = '<p style="color: #ff4757; text-align: center; grid-column: 1/-1;">Error al conectar con el servidor.</p>';
+        }
     }
 });

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalles del Evento - Villaticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .detalle-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .detalle-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+        .detalle-content {
+            padding: 30px;
+        }
+        .detalle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .detalle-categoria {
+            background: #ff4757;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .detalle-titulo {
+            font-size: 2.5rem;
+            color: white;
+            margin: 10px 0;
+        }
+        .detalle-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .info-item h4 {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        .info-item p {
+            color: white;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        .detalle-descripcion {
+            color: #ccc;
+            line-height: 1.6;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+        }
+        /* NUEVO: Estilos para la galería */
+        .galeria-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .galeria-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #444;
+            transition: transform 0.3s ease;
+        }
+        .galeria-img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="auth-body">
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="logo-area" style="text-decoration: none;">
+            <span>🎫</span> Villaticket
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="nav-item">Volver a Cartelera</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="detalle-container" id="detalleContenedor" style="display: none;">
+        <img id="eventoImagen" src="" alt="Imagen del evento" class="detalle-img">
+
+        <div class="detalle-content">
+            <div class="detalle-header">
+                <div>
+                    <span id="eventoCategoria" class="detalle-categoria">Categoría</span>
+                    <h1 id="eventoTitulo" class="detalle-titulo">Cargando...</h1>
+                </div>
+            </div>
+
+            <div class="detalle-info-grid">
+                <div class="info-item">
+                    <h4>📅 Fecha</h4>
+                    <p id="eventoFecha">--/--/----</p>
+                </div>
+                <div class="info-item">
+                    <h4>⏰ Hora</h4>
+                    <p id="eventoHora">--:--</p>
+                </div>
+                <div class="info-item">
+                    <h4>📍 Ubicación</h4>
+                    <p id="eventoUbicacion">Cargando...</p>
+                </div>
+            </div>
+
+            <h3 style="color: white; margin-bottom: 15px;">Acerca del Evento</h3>
+            <div id="eventoDescripcion" class="detalle-descripcion">
+                Cargando descripción...
+            </div>
+
+            <!-- NUEVO: Contenedor de la Galería -->
+            <h3 style="color: white; margin-bottom: 15px;">Galería de Imágenes</h3>
+            <div id="eventoGaleria" class="galeria-grid">
+                <!-- Se inyectan con JS -->
+            </div>
+
+            <button class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; cursor: pointer;">
+                Ver Zonas y Comprar Entradas
+            </button>
+        </div>
+    </div>
+
+    <div id="mensajeEstado" style="text-align: center; margin-top: 100px; color: white; font-size: 1.2rem;">
+        Cargando información del evento...
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/detalle-evento.js"></script>
+</body>
+</html>

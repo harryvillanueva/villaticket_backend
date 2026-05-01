@@ -25,23 +25,27 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Recursos estáticos y vistas públicas
+                        // 1. Recursos estáticos, vistas públicas y manejo de errores
                         .requestMatchers(
                                 "/",
                                 "/*.html",
+                                "/favicon.ico",
+                                "/error",
                                 "/css/**",
                                 "/js/**",
                                 "/img/**",
                                 "/assets/**",
-                                "/uploads/**" // Permite ver las imágenes guardadas
+                                "/uploads/**"
                         ).permitAll()
                         // 2. Endpoints de la API
                         .requestMatchers(
                                 "/api/users/**",
                                 "/api/auth/**",
+                                "/api/eventos",
                                 "/api/eventos/**",
+                                "/api/zonas",
                                 "/api/zonas/**",
-                                "/api/upload/**" // <-- ¡NUEVO! Permite subir imágenes sin dar 403
+                                "/api/upload/**"
                         ).permitAll()
                         // 3. Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
@@ -54,7 +58,6 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permite peticiones desde cualquier origen (tu frontend)
         configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
