@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetchAPI('/auth/login', 'POST', data);
 
             // Guardamos el JWT en localStorage usando auth.js
-            Auth.guardarSesion(response.token, response.rol);
+            Auth.guardarSesion(response.token, response.rol, response.email);
 
             // Redirigimos según el rol (si es vendedor, quizá quieras mandarlo a un dashboard)
             if(response.rol === 'VENDEDOR') {

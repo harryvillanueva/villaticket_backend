@@ -2,8 +2,8 @@ package com.villaticket_backend.modules.user.infrastructure.adapter;
 
 import com.villaticket_backend.modules.user.domain.model.Usuario;
 import com.villaticket_backend.modules.user.domain.repository.IUsuarioRepository;
-import com.villaticket_backend.modules.user.infrastructure.persistence.JpaUsuarioRepository;
-import com.villaticket_backend.modules.user.infrastructure.persistence.UsuarioEntity;
+import com.villaticket_backend.modules.user.infrastructure.persistence.jpa.JpaUsuarioRepository;
+import com.villaticket_backend.modules.user.infrastructure.persistence.entities.UsuarioEntity;
 import com.villaticket_backend.modules.user.infrastructure.persistence.UsuarioMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;

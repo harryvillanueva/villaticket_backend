@@ -1,6 +1,9 @@
 package com.villaticket_backend.modules.user.infrastructure.persistence;
 
 import com.villaticket_backend.modules.user.domain.model.Usuario;
+import com.villaticket_backend.modules.user.infrastructure.persistence.entities.RolEntity;
+import com.villaticket_backend.modules.user.infrastructure.persistence.entities.UsuarioEntity;
+import com.villaticket_backend.modules.user.infrastructure.persistence.jpa.JpaRolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
