@@ -37,16 +37,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('descripcion').value = evento.descripcion;
         document.getElementById('fecha').value = evento.fecha;
 
-        // La hora a veces viene con segundos "18:00:00", el input type="time" necesita "18:00"
         let horaFormat = evento.hora;
         if(horaFormat && horaFormat.split(':').length === 3){
             horaFormat = horaFormat.substring(0,5);
         }
         document.getElementById('hora').value = horaFormat;
-
         document.getElementById('ubicacion').value = evento.ubicacion;
 
-        // Seleccionar la categoría correcta iterando las opciones
         Array.from(selectCategoria.options).forEach(opt => {
             if (opt.text === evento.categoriaNombre) {
                 opt.selected = true;
@@ -58,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'dashboard-vendedor.html';
     }
 
-    // Función para subir imagen
     async function subirImagen(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -87,7 +83,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             let horaFormateada = document.getElementById('hora').value;
-            if (horaFormateada.split(':').length === 2) { horaFormateada += ":00"; }
+            if (horaFormateada.split(':').length === 2) {
+                horaFormateada += ":00";
+            }
 
             const datosActualizados = {
                 titulo: document.getElementById('titulo').value,
@@ -95,8 +93,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 fecha: document.getElementById('fecha').value,
                 hora: horaFormateada,
                 ubicacion: document.getElementById('ubicacion').value,
-                categoriaId: document.getElementById('categoriaId').value,
-                imagen: nuevaUrlImagen
+                categoriaId: parseInt(document.getElementById('categoriaId').value),
+                imagen: nuevaUrlImagen // Se mapea a EditarEventoRequest.imagen
             };
 
             await fetchAPI(`/eventos/${eventoId}`, 'PUT', datosActualizados);

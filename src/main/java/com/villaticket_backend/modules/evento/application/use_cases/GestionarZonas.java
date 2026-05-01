@@ -32,7 +32,7 @@ public class GestionarZonas {
         zona.setNombre(request.getNombre());
         zona.setCapacidadTotal(request.getCapacidadTotal());
         zona.setCapacidadActual(request.getCapacidadTotal());
-        zona.setPrecio(request.getPrecio());
+        zona.setPrecio(request.getPrecio()); // request.getPrecio() ya es BigDecimal
         zona.setEvento(evento);
 
         zonaRepository.save(zona);
@@ -43,12 +43,11 @@ public class GestionarZonas {
         ZonaEntity zona = zonaRepository.findById(zonaId)
                 .orElseThrow(() -> new RuntimeException("Zona no encontrada"));
 
-        // Ajuste de capacidad si el aforo cambia
         int diferencia = request.getCapacidadTotal() - zona.getCapacidadTotal();
 
         zona.setNombre(request.getNombre());
         zona.setCapacidadTotal(request.getCapacidadTotal());
-        zona.setPrecio(request.getPrecio());
+        zona.setPrecio(request.getPrecio()); // request.getPrecio() ya es BigDecimal
         zona.setCapacidadActual(zona.getCapacidadActual() + diferencia);
 
         zonaRepository.save(zona);
@@ -57,14 +56,22 @@ public class GestionarZonas {
     public List<ZonaDTO> listarZonasDeEvento(Long eventoId) {
         return zonaRepository.findAll().stream()
                 .filter(z -> z.getEvento().getId().equals(eventoId))
-                .map(z -> {
-                    ZonaDTO dto = new ZonaDTO();
-                    dto.setId(z.getId());
-                    dto.setNombre(z.getNombre());
-                    dto.setCapacidadTotal(z.getCapacidadTotal());
-                    dto.setCapacidadActual(z.getCapacidadActual());
-                    dto.setPrecio(z.getPrecio());
-                    return dto;
-                }).collect(Collectors.toList());
+                .map(z -> new ZonaDTO(
+                        z.getId(),
+                        z.getNombre(),
+                        z.getCapacidadTotal(),
+                        z.getCapacidadActual(),
+                        z.getPrecio() // Sin conversiones, ambos son BigDecimal
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void eliminarZona(Long id) {
+        if (zonaRepository.existsById(id)) {
+            zonaRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("La zona no existe");
+        }
     }
 }

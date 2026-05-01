@@ -3,6 +3,7 @@ package com.villaticket_backend.modules.evento.application.dtos;
 import java.math.BigDecimal;
 
 public class CrearZonaRequest {
+    private Long eventoId; // NUEVO: Campo necesario para el controlador
     private String nombre;
     private Integer capacidad;
     private BigDecimal precio;
@@ -33,4 +34,6 @@ public class CrearZonaRequest {
     public void setCapacidadActual(Integer capacidadActual) {
         this.capacidadActual = capacidadActual;
     }
+    public Long getEventoId() { return eventoId; }
+    public void setEventoId(Long eventoId) { this.eventoId = eventoId; }
 }

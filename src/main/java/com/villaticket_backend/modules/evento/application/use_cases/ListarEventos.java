@@ -15,19 +15,16 @@ public class ListarEventos {
     @Autowired
     private JpaEventoRepository eventoRepository;
 
-    // Método para el panel del Vendedor (Muestra todos sus eventos, sean borradores o no)
     public List<EventoDTO> ejecutarPorVendedor(String email) {
         List<EventoEntity> entidades = eventoRepository.findByVendedor_Email(email);
         return mapearLista(entidades);
     }
 
-    // NUEVO MÉTODO: Para la Cartelera Pública (Muestra SOLO los eventos PUBLICADOS de todos los vendedores)
     public List<EventoDTO> ejecutarPublicos() {
         List<EventoEntity> entidades = eventoRepository.findByEstado("PUBLICADO");
         return mapearLista(entidades);
     }
 
-    // Función auxiliar para no repetir código de mapeo
     private List<EventoDTO> mapearLista(List<EventoEntity> entidades) {
         List<EventoDTO> dtos = new ArrayList<>();
         for (EventoEntity evento : entidades) {
@@ -35,11 +32,10 @@ public class ListarEventos {
             dto.setId(evento.getId());
             dto.setTitulo(evento.getTitulo());
             dto.setDescripcion(evento.getDescripcion());
+            // IMPORTANTE: Aseguramos que imagenUrl tenga el valor de la entidad
             dto.setImagenUrl(evento.getImagen());
-
             dto.setFecha(evento.getFecha() != null ? evento.getFecha().toString() : "Por definir");
             dto.setHora(evento.getHora() != null ? evento.getHora().toString() : "Por definir");
-
             dto.setUbicacion(evento.getUbicacion());
             dto.setEstado(evento.getEstado());
 
@@ -48,7 +44,6 @@ public class ListarEventos {
             } else {
                 dto.setCategoriaNombre("Sin categoría");
             }
-
             dtos.add(dto);
         }
         return dtos;
