@@ -74,7 +74,8 @@ public class EventoController {
         return ResponseEntity.ok(eventoPublicado);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<EventoEntity> editar(@PathVariable Long id, @RequestBody EditarEventoRequest request) {
+    public ResponseEntity<EventoDTO> editar(@PathVariable Long id, @RequestBody EditarEventoRequest request) {
+        // Ahora devuelve EventoDTO, Jackson no tendrá problemas con Hibernate
         return ResponseEntity.ok(editarEvento.ejecutar(id, request));
     }
 }

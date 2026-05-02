@@ -18,11 +18,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function cargarDashboard() {
         try {
+            // Llamada para obtener eventos del vendedor
             const eventos = await fetchAPI(`/eventos/vendedor/${email}`, 'GET');
             grid.innerHTML = '';
 
             if (!eventos || eventos.length === 0) {
-                grid.innerHTML = '<p style="color: white; grid-column: 1/-1; text-align: center;">No tienes eventos creados.</p>';
+                grid.innerHTML = '<p style="color: white; grid-column: 1/-1; text-align: center;">No tienes eventos creados aún.</p>';
                 return;
             }
 
@@ -30,16 +31,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const id = evento.id;
                 const estado = evento.estado || 'BORRADOR';
 
-                // Usamos imagenUrl que viene del EventoDTO del backend
-                const imagen = (evento.imagenUrl && evento.imagenUrl !== 'null' && evento.imagenUrl !== 'undefined')
+                // CORRECCIÓN CLAVE: El DTO del Backend usa 'imagenUrl'
+                // Validamos que exista y no sea una cadena de texto "null" o "undefined"
+                const imagenFinal = (evento.imagenUrl && evento.imagenUrl !== 'null' && evento.imagenUrl !== 'undefined' && evento.imagenUrl !== "")
                     ? evento.imagenUrl
                     : 'https://via.placeholder.com/400x200?text=Sin+Imagen';
 
                 grid.innerHTML += `
                     <article class="card-evento">
-                        <img src="${imagen}" alt="${evento.titulo}" class="card-img" onerror="this.src='https://via.placeholder.com/400x200?text=Error+al+cargar'">
+                        <img src="${imagenFinal}" alt="${evento.titulo}" class="card-img" onerror="this.src='https://via.placeholder.com/400x200?text=Error+al+cargar'">
                         <div class="card-body">
-                            <span class="card-category">${evento.categoriaNombre}</span>
+                            <span class="card-category">${evento.categoriaNombre || 'Sin Categoría'}</span>
                             <h3 class="card-title">${evento.titulo}</h3>
                             <p class="card-info">📅 ${evento.fecha}</p>
                             <p class="card-status">Estado: <strong>${estado}</strong></p>
@@ -62,19 +64,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         } catch (error) {
             console.error("Error en dashboard:", error);
+            grid.innerHTML = '<p style="color: red; text-align: center; grid-column: 1/-1;">Error al cargar los eventos.</p>';
         }
     }
 
     window.publicarEvento = async (id) => {
-        if (!confirm("¿Publicar evento? Ya no podrás volverlo a borrador.")) return;
+        if (!confirm("¿Estás seguro de publicar este evento? Ya no podrás volverlo a borrador.")) return;
         try {
             await fetchAPI(`/eventos/${id}/publicar`, 'PUT');
-            alert("¡Evento publicado!");
+            alert("¡Evento publicado con éxito!");
             cargarDashboard();
         } catch (e) {
             alert("Error al publicar: " + e.message);
         }
     };
 
-    await cargarDashboard();
+    cargarDashboard();
 });

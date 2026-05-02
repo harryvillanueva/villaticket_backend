@@ -1,6 +1,7 @@
 package com.villaticket_backend.modules.evento.application.use_cases;
 
 import com.villaticket_backend.modules.evento.application.dtos.EditarEventoRequest;
+import com.villaticket_backend.modules.evento.application.dtos.EventoDTO; // Importar DTO
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.CategoriaEntity;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.EventoEntity;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaCategoriaRepository;
@@ -22,7 +23,7 @@ public class EditarEvento {
     private JpaCategoriaRepository categoriaRepository;
 
     @Transactional
-    public EventoEntity ejecutar(Long id, EditarEventoRequest request) {
+    public EventoDTO ejecutar(Long id, EditarEventoRequest request) { // Cambiar retorno a DTO
         EventoEntity evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
@@ -36,10 +37,24 @@ public class EditarEvento {
         evento.setUbicacion(request.getUbicacion());
         evento.setCategoria(categoria);
 
-        if (request.getImagen() != null && !request.getImagen().isEmpty()) {
+        if (request.getImagen() != null && !request.getImagen().isEmpty() && !request.getImagen().equals("null")) {
             evento.setImagen(request.getImagen());
         }
 
-        return eventoRepository.save(evento);
+        EventoEntity guardado = eventoRepository.save(evento);
+
+        // Convertir la entidad a DTO antes de devolverla para evitar errores de Jackson/Hibernate
+        EventoDTO dto = new EventoDTO();
+        dto.setId(guardado.getId());
+        dto.setTitulo(guardado.getTitulo());
+        dto.setDescripcion(guardado.getDescripcion());
+        dto.setImagenUrl(guardado.getImagen());
+        dto.setFecha(guardado.getFecha().toString());
+        dto.setHora(guardado.getHora().toString());
+        dto.setUbicacion(guardado.getUbicacion());
+        dto.setEstado(guardado.getEstado());
+        dto.setCategoriaNombre(guardado.getCategoria().getNombre());
+
+        return dto;
     }
 }
