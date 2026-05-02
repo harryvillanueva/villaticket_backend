@@ -70,7 +70,6 @@
             margin-bottom: 30px;
             white-space: pre-wrap;
         }
-        /* NUEVO: Estilos para la galería */
         .galeria-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -88,6 +87,34 @@
         .galeria-img:hover {
             transform: scale(1.05);
         }
+        .compra-box {
+            background: #2a2a2a;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 1px solid #444;
+        }
+        .compra-form-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .compra-form-group select, .compra-form-group input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #555;
+            background: #333;
+            color: white;
+            font-size: 1rem;
+        }
+        .total-pagar {
+            font-size: 1.5rem;
+            color: #2ecc71;
+            font-weight: bold;
+            text-align: right;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body class="auth-body">
@@ -95,7 +122,7 @@
 <nav class="navbar">
     <div class="nav-container">
         <a href="index.html" class="logo-area" style="text-decoration: none;">
-            <span>🎫</span> Villaticket
+            <span>🎟️</span> Villaticket
         </a>
         <div class="nav-links">
             <a href="index.html" class="nav-item">Volver a Cartelera</a>
@@ -104,14 +131,18 @@
 </nav>
 
 <div class="container">
+    <div id="mensajeEstado" style="text-align: center; margin-top: 100px; color: white; font-size: 1.2rem;">
+        Cargando información del evento...
+    </div>
+
     <div class="detalle-container" id="detalleContenedor" style="display: none;">
-        <img id="eventoImagen" src="" alt="Imagen del evento" class="detalle-img">
+        <img id="eventoImagen" src="" alt="Imagen del evento" class="detalle-img" onerror="this.src='https://via.placeholder.com/900x400?text=Sin+Imagen'">
 
         <div class="detalle-content">
             <div class="detalle-header">
                 <div>
                     <span id="eventoCategoria" class="detalle-categoria">Categoría</span>
-                    <h1 id="eventoTitulo" class="detalle-titulo">Cargando...</h1>
+                    <h1 id="eventoTitulo" class="detalle-titulo">Título del Evento</h1>
                 </div>
             </div>
 
@@ -131,24 +162,30 @@
             </div>
 
             <h3 style="color: white; margin-bottom: 15px;">Acerca del Evento</h3>
-            <div id="eventoDescripcion" class="detalle-descripcion">
-                Cargando descripción...
-            </div>
+            <div id="eventoDescripcion" class="detalle-descripcion"></div>
 
-            <!-- NUEVO: Contenedor de la Galería -->
-            <h3 style="color: white; margin-bottom: 15px;">Galería de Imágenes</h3>
+            <h3 style="color: white; margin-bottom: 15px;" id="tituloGaleria" style="display:none;">Galería de Imágenes</h3>
             <div id="eventoGaleria" class="galeria-grid">
-                <!-- Se inyectan con JS -->
             </div>
 
-            <button class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; cursor: pointer;">
-                Ver Zonas y Comprar Entradas
-            </button>
-        </div>
-    </div>
+            <div class="compra-box">
+                <h3 style="color: white; margin-top:0; margin-bottom: 15px;">Comprar Entradas</h3>
+                <div class="compra-form-group">
+                    <select id="zonaSelect">
+                        <option value="" disabled selected>Cargando zonas...</option>
+                    </select>
+                    <input type="number" id="cantidadInput" min="1" max="10" placeholder="Cantidad" value="1">
+                </div>
 
-    <div id="mensajeEstado" style="text-align: center; margin-top: 100px; color: white; font-size: 1.2rem;">
-        Cargando información del evento...
+                <!-- CORRECCIÓN: Euro añadido -->
+                <div class="total-pagar" id="totalPagar">Total: 0.00 €</div>
+
+                <button id="btnComprar" class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; cursor: pointer;">
+                    Confirmar Compra
+                </button>
+            </div>
+
+        </div>
     </div>
 </div>
 

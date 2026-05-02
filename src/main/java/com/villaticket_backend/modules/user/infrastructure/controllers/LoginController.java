@@ -16,7 +16,7 @@ public class LoginController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        LoginResponse response = loginUser.execute(request);
+        LoginResponse response = loginUser.ejecutar(request);
         return ResponseEntity.ok(response);
     }
 }
