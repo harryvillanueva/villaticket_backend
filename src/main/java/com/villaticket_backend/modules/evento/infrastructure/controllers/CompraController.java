@@ -50,6 +50,8 @@ public class CompraController {
                     dto.setEventoHora(ticket.getEvento().getHora().toString());
                     dto.setZonaNombre(ticket.getZona().getNombre());
                     dto.setPrecioPagado(ticket.getZona().getPrecio());
+                    dto.setNombreAsistente(ticket.getNombreAsistente());
+                    dto.setDocumentoAsistente(ticket.getDocumentoAsistente());
                     return dto;
                 }).collect(Collectors.toList());
 

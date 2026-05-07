@@ -21,9 +21,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const selectZona = document.getElementById('zonaSelect');
     const inputCantidad = document.getElementById('cantidadInput');
+    const asistentesContainer = document.getElementById('asistentesContainer'); // Nuevo contenedor
     const btnComprar = document.getElementById('btnComprar');
     const totalPagarEl = document.getElementById('totalPagar');
 
+    // 1. Cargar la información del evento
     try {
         const evento = await fetchAPI(`/eventos/${eventoId}`, 'GET');
 
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // 2. Cargar las zonas
     try {
         const zonasDisponibles = await fetchAPI(`/zonas/evento/${eventoId}`, 'GET');
 
@@ -58,7 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         zonasDisponibles.forEach(zona => {
             if (zona.capacidadActual > 0) {
                 hayZonas = true;
-                // CORRECCIÓN: Símbolo de Euro
                 selectZona.innerHTML += `<option value="${zona.id}" data-precio="${zona.precio}">
                     ${zona.nombre} - ${zona.precio} € (Quedan: ${zona.capacidadActual})
                 </option>`;
@@ -75,23 +77,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         selectZona.innerHTML = '<option value="" disabled>Error al cargar zonas</option>';
     }
 
-    function calcularTotal() {
+    // --- NUEVO: DIBUJAR LOS FORMULARIOS DE ASISTENTES ---
+    function renderizarAsistentes() {
+        const cantidad = parseInt(inputCantidad.value) || 0;
+        asistentesContainer.innerHTML = ''; // Limpiar lo anterior
+
+        if (cantidad > 0) {
+            for (let i = 1; i <= cantidad; i++) {
+                asistentesContainer.innerHTML += `
+                    <div style="margin-top: 15px; padding: 15px; background: #333; border-radius: 8px; border: 1px solid #555;">
+                        <h4 style="color: white; margin-top: 0; margin-bottom: 10px;">Asistente ${i}</h4>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="nombreAsistente${i}" placeholder="Nombre Completo" required style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #666; background: #222; color: white;">
+                            <input type="text" id="docAsistente${i}" placeholder="DNI / NIE" required style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #666; background: #222; color: white;">
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    // 3. Lógica para calcular el total a pagar y redibujar asistentes
+    function actualizarCompra() {
         const zonaSeleccionada = selectZona.options[selectZona.selectedIndex];
         const cantidad = parseInt(inputCantidad.value) || 0;
 
         if (zonaSeleccionada && zonaSeleccionada.value !== "" && cantidad > 0) {
             const precio = parseFloat(zonaSeleccionada.getAttribute('data-precio'));
             const total = precio * cantidad;
-            // CORRECCIÓN: Símbolo de Euro al final
             totalPagarEl.textContent = `Total: ${total.toFixed(2)} €`;
         } else {
             totalPagarEl.textContent = `Total: 0.00 €`;
         }
     }
 
-    selectZona.addEventListener('change', calcularTotal);
-    inputCantidad.addEventListener('input', calcularTotal);
+    // Escuchamos los cambios
+    selectZona.addEventListener('change', actualizarCompra);
+    inputCantidad.addEventListener('input', () => {
+        actualizarCompra();
+        renderizarAsistentes(); // Redibujar cajas cuando cambia el número
+    });
 
+    // Llamamos una vez al inicio para que dibuje el Asistente 1 (ya que el input dice "1" por defecto)
+    renderizarAsistentes();
+
+    // 4. Procesar la compra
     btnComprar.addEventListener('click', async (e) => {
         e.preventDefault();
 
@@ -110,18 +140,47 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // --- NUEVO: RECOPILAR DATOS DE LOS ASISTENTES ---
+        const listaAsistentes = [];
+        for (let i = 1; i <= cantidad; i++) {
+            const nombre = document.getElementById(`nombreAsistente${i}`).value.trim();
+            const documento = document.getElementById(`docAsistente${i}`).value.trim();
+
+            if (!nombre || !documento) {
+                alert(`Por favor completa el Nombre y Documento del Asistente ${i}`);
+                return; // Frenamos la compra si falta un dato
+            }
+            listaAsistentes.push({ nombre: nombre, documento: documento });
+        }
+
         btnComprar.disabled = true;
         btnComprar.textContent = "Procesando pago...";
 
         try {
+            // El request body ahora coincide con la nueva estructura de Java
             const requestBody = {
                 eventoId: parseInt(eventoId),
                 zonaId: parseInt(zonaId),
-                cantidad: cantidad,
-                usuarioEmail: emailCliente
+                usuarioEmail: emailCliente,
+                asistentes: listaAsistentes // Enviamos el array de asistentes en vez de "cantidad"
             };
 
-            await fetchAPI('/compras/procesar', 'POST', requestBody);
+            const token = Auth.obtenerToken();
+            const baseUrl = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:8080/api';
+
+            const response = await fetch(`${baseUrl}/compras/procesar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Error en el servidor al procesar el pago");
+            }
 
             alert("¡Compra exitosa! Tus entradas han sido generadas.");
             window.location.href = 'mis-tickets.html';

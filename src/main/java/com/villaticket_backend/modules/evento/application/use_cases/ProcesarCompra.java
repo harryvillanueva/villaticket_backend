@@ -30,37 +30,35 @@ public class ProcesarCompra {
     @Transactional
     public List<TicketDTO> ejecutar(CompraRequest request) {
 
-        // 1. Buscamos al usuario comprador
+        // La cantidad a comprar ahora es el tamaño de la lista de asistentes
+        int cantidadAComprar = request.getAsistentes().size();
+
         UsuarioEntity usuario = usuarioRepository.findByEmail(request.getUsuarioEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2. Buscamos el evento y la zona
         EventoEntity evento = eventoRepository.findById(request.getEventoId())
                 .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
         ZonaEntity zona = zonaRepository.findById(request.getZonaId())
                 .orElseThrow(() -> new RuntimeException("Zona no encontrada"));
 
-        // 3. Verificamos que la zona pertenezca al evento
         if (!zona.getEvento().getId().equals(evento.getId())) {
             throw new RuntimeException("La zona no pertenece a este evento");
         }
 
-        // 4. Verificamos si hay stock (capacidad actual)
-        if (zona.getCapacidadActual() < request.getCantidad()) {
-            throw new RuntimeException("No hay suficientes entradas disponibles en esta zona. Quedan: " + zona.getCapacidadActual());
+        if (zona.getCapacidadActual() < cantidadAComprar) {
+            throw new RuntimeException("No hay suficientes entradas disponibles en esta zona.");
         }
 
-        // 5. Restamos el stock
-        zona.setCapacidadActual(zona.getCapacidadActual() - request.getCantidad());
+        // Restar stock
+        zona.setCapacidadActual(zona.getCapacidadActual() - cantidadAComprar);
         zonaRepository.save(zona);
 
-        // 6. Generamos los tickets solicitados
         List<TicketDTO> ticketsComprados = new ArrayList<>();
 
-        for (int i = 0; i < request.getCantidad(); i++) {
+        // Iteramos sobre cada asistente enviado desde el frontend
+        for (CompraRequest.AsistenteDTO asistente : request.getAsistentes()) {
             TicketEntity ticket = new TicketEntity();
-            // UUID.randomUUID() genera un código como este: "123e4567-e89b-12d3-a456-426614174000"
             ticket.setCodigoQr(UUID.randomUUID().toString());
             ticket.setFechaCompra(LocalDateTime.now());
             ticket.setEstado("ACTIVO");
@@ -68,9 +66,12 @@ public class ProcesarCompra {
             ticket.setZona(zona);
             ticket.setUsuario(usuario);
 
+            // Asignamos los datos nominativos
+            ticket.setNombreAsistente(asistente.getNombre());
+            ticket.setDocumentoAsistente(asistente.getDocumento());
+
             TicketEntity ticketGuardado = ticketRepository.save(ticket);
 
-            // Convertimos a DTO para responder al frontend
             TicketDTO dto = new TicketDTO();
             dto.setId(ticketGuardado.getId());
             dto.setCodigoQr(ticketGuardado.getCodigoQr());
@@ -79,12 +80,15 @@ public class ProcesarCompra {
             dto.setEventoFecha(evento.getFecha().toString());
             dto.setEventoHora(evento.getHora().toString());
             dto.setZonaNombre(zona.getNombre());
-            dto.setPrecioPagado(zona.getPrecio()); // BigDecimal
+            dto.setPrecioPagado(zona.getPrecio());
+
+            // Pasamos los datos al DTO para que el frontend los vea
+            dto.setNombreAsistente(ticketGuardado.getNombreAsistente());
+            dto.setDocumentoAsistente(ticketGuardado.getDocumentoAsistente());
 
             ticketsComprados.add(dto);
         }
 
-        // Retornamos la lista de entradas compradas
         return ticketsComprados;
     }
 }

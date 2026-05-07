@@ -12,6 +12,10 @@ public class TicketDTO {
     private String zonaNombre;
     private BigDecimal precioPagado;
 
+    // NUEVOS CAMPOS
+    private String nombreAsistente;
+    private String documentoAsistente;
+
     public TicketDTO() {}
 
     public Long getId() { return id; }
@@ -30,4 +34,9 @@ public class TicketDTO {
     public void setZonaNombre(String zonaNombre) { this.zonaNombre = zonaNombre; }
     public BigDecimal getPrecioPagado() { return precioPagado; }
     public void setPrecioPagado(BigDecimal precioPagado) { this.precioPagado = precioPagado; }
+
+    public String getNombreAsistente() { return nombreAsistente; }
+    public void setNombreAsistente(String nombreAsistente) { this.nombreAsistente = nombreAsistente; }
+    public String getDocumentoAsistente() { return documentoAsistente; }
+    public void setDocumentoAsistente(String documentoAsistente) { this.documentoAsistente = documentoAsistente; }
 }

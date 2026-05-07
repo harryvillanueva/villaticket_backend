@@ -114,6 +114,7 @@
             font-weight: bold;
             text-align: right;
             margin-bottom: 15px;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -170,6 +171,7 @@
 
             <div class="compra-box">
                 <h3 style="color: white; margin-top:0; margin-bottom: 15px;">Comprar Entradas</h3>
+
                 <div class="compra-form-group">
                     <select id="zonaSelect">
                         <option value="" disabled selected>Cargando zonas...</option>
@@ -177,7 +179,9 @@
                     <input type="number" id="cantidadInput" min="1" max="10" placeholder="Cantidad" value="1">
                 </div>
 
-                <!-- CORRECCIÓN: Euro añadido -->
+                <div id="asistentesContainer">
+                </div>
+
                 <div class="total-pagar" id="totalPagar">Total: 0.00 €</div>
 
                 <button id="btnComprar" class="btn-primary" style="width: 100%; padding: 15px; font-size: 1.2rem; cursor: pointer;">

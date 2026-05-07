@@ -13,13 +13,21 @@ public class TicketEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String codigoQr; // El texto único que JavaScript convertirá en imagen QR
+    private String codigoQr;
 
     @Column(nullable = false)
     private LocalDateTime fechaCompra;
 
     @Column(nullable = false)
-    private String estado; // ACTIVO, USADO, CANCELADO
+    private String estado;
+
+    // --- NUEVOS CAMPOS NOMINATIVOS ---
+    @Column(nullable = false)
+    private String nombreAsistente;
+
+    @Column(nullable = false)
+    private String documentoAsistente;
+    // ---------------------------------
 
     @ManyToOne
     @JoinColumn(name = "evento_id", nullable = false)
@@ -44,6 +52,12 @@ public class TicketEntity {
     public void setFechaCompra(LocalDateTime fechaCompra) { this.fechaCompra = fechaCompra; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public String getNombreAsistente() { return nombreAsistente; }
+    public void setNombreAsistente(String nombreAsistente) { this.nombreAsistente = nombreAsistente; }
+    public String getDocumentoAsistente() { return documentoAsistente; }
+    public void setDocumentoAsistente(String documentoAsistente) { this.documentoAsistente = documentoAsistente; }
+
     public EventoEntity getEvento() { return evento; }
     public void setEvento(EventoEntity evento) { this.evento = evento; }
     public ZonaEntity getZona() { return zona; }
