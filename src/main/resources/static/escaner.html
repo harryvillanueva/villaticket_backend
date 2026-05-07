@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escáner de Tickets - Villaticket</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body { background-color: #121212; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 0; }
+        .scanner-container { max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
+        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid #333; }
+        .result-box { margin-top: 20px; padding: 20px; border-radius: 8px; display: none; font-size: 1.2rem; }
+        .success { background-color: #2ecc71; color: #000; }
+        .error { background-color: #e74c3c; color: #fff; }
+        .warning { background-color: #f1c40f; color: #000; }
+        .btn-restart { margin-top: 15px; padding: 12px 20px; font-size: 1.1rem; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold;}
+    </style>
+</head>
+<body>
+
+<div class="scanner-container">
+    <h2 style="color: #ff4757; margin-bottom: 5px;">📷 Escáner Villaticket</h2>
+    <p style="color: #aaa; margin-bottom: 20px;">Apunta la cámara al código QR del cliente</p>
+
+    <div id="reader"></div>
+
+    <div id="resultBox" class="result-box">
+        <h3 id="resultMessage" style="margin-top: 0;"></h3>
+        <p id="resultDetails" style="margin: 5px 0; font-size: 1rem;"></p>
+        <button id="btnContinuar" class="btn-restart">Siguiente Ticket</button>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/escaner.js"></script>
+</body>
+</html>

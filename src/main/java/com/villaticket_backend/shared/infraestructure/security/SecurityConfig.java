@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/upload/**").hasAuthority("VENDEDOR")
                         .requestMatchers("/api/eventos/**").hasAuthority("VENDEDOR")
                         .requestMatchers("/api/zonas/**").hasAuthority("VENDEDOR")
+                        .requestMatchers("/api/tickets/**").hasAuthority("VENDEDOR")
 
                         // 4. Todo lo demás cerrado
                         .anyRequest().authenticated()

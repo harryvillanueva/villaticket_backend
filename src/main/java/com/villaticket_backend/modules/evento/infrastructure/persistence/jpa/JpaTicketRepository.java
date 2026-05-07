@@ -10,4 +10,5 @@ public interface JpaTicketRepository extends JpaRepository<TicketEntity, Long> {
 
     // Para cuando el portero escanee el QR
     TicketEntity findByCodigoQr(String codigoQr);
+
 }

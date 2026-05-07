@@ -1,46 +1,69 @@
-// js/login.js
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('loginForm');
-    const errorDiv = document.getElementById('loginError');
-    const btnSubmit = document.getElementById('btnLogin');
+    const loginForm = document.getElementById('loginForm');
 
-    // Si ya está logueado, mandarlo al index
+    // Si ya tiene sesión, redirigir según el flujo inteligente
     if (Auth.estaAutenticado()) {
-        window.location.href = 'index.html';
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectPage = urlParams.get('redirect');
+
+        if (redirectPage) {
+            window.location.href = decodeURIComponent(redirectPage);
+        } else {
+            const role = Auth.obtenerRol();
+            window.location.href = (role === 'VENDEDOR') ? 'dashboard-vendedor.html' : 'index.html';
+        }
+        return;
     }
 
-    form.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        errorDiv.style.display = 'none';
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Verificando...';
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
 
-        const data = {
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value
-        };
+        const btnSubmit = loginForm.querySelector('button[type="submit"]');
+        const originalBtnText = btnSubmit.textContent;
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Verificando...";
 
         try {
-            // Suponiendo que tu endpoint devuelve { token: "ey...", rol: "CLIENTE" }
-            const response = await fetchAPI('/auth/login', 'POST', data);
+            const baseUrl = window.location.origin + '/api';
 
-            // Guardamos el JWT en localStorage usando auth.js
-            Auth.guardarSesion(response.token, response.rol, response.email);
+            const response = await fetch(`${baseUrl}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
 
-            // Redirigimos según el rol (si es vendedor, quizá quieras mandarlo a un dashboard)
-            if(response.rol === 'VENDEDOR') {
-                window.location.href = 'crear-evento.html'; // O panel de vendedor
+            const data = await response.json();
+
+            if (response.ok) {
+                // Guardar usando las constantes de Auth para evitar errores de dedo
+                localStorage.setItem(Auth.TOKEN_KEY, data.token);
+                localStorage.setItem(Auth.EMAIL_KEY, data.email);
+                localStorage.setItem(Auth.ROLE_KEY, data.role);
+
+                // Pequeña espera para que el navegador asiente los datos
+                setTimeout(() => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const redirectPage = urlParams.get('redirect');
+
+                    if (redirectPage) {
+                        window.location.href = decodeURIComponent(redirectPage);
+                    } else {
+                        window.location.href = (data.role === 'VENDEDOR') ? 'dashboard-vendedor.html' : 'index.html';
+                    }
+                }, 100);
+
             } else {
-                window.location.href = 'index.html'; // Cartelera para clientes
+                alert(data.error || "Credenciales incorrectas.");
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = originalBtnText;
             }
-
         } catch (error) {
-            errorDiv.textContent = 'Credenciales incorrectas o error en el servidor.';
-            errorDiv.style.display = 'block';
-        } finally {
+            alert("Error de conexión con el servidor.");
             btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Entrar';
+            btnSubmit.textContent = originalBtnText;
         }
     });
 });
