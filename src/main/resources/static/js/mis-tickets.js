@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Verificación de seguridad inicial
     if (!Auth.estaAutenticado()) {
         window.location.href = 'login.html';
         return;
@@ -7,6 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const gridTickets = document.getElementById('misTicketsGrid');
     const email = localStorage.getItem('villaticket_email');
 
+    /**
+     * Carga los tickets del usuario desde el servidor y los muestra en pantalla
+     */
     async function cargarTickets() {
         try {
             const token = Auth.obtenerToken();
@@ -20,99 +24,131 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            if (!response.ok) throw new Error(`Error: ${response.status}`);
+            if (!response.ok) throw new Error(`Error en el servidor: ${response.status}`);
 
             const tickets = await response.json();
-            gridTickets.innerHTML = '';
+            gridTickets.innerHTML = ''; // Limpiar cargador
 
             if (!tickets || tickets.length === 0) {
-                gridTickets.innerHTML = '<p style="text-align: center; width: 100%; color: #ccc;">Aún no tienes entradas.</p>';
+                gridTickets.innerHTML = `
+                    <div style="text-align: center; width: 100%; padding: 50px; color: #888;">
+                        <p style="font-size: 1.2rem;">Aún no tienes entradas compradas.</p>
+                        <a href="index.html" class="btn-primary" style="display: inline-block; margin-top: 15px; text-decoration: none;">Ir a cartelera</a>
+                    </div>`;
                 return;
             }
 
+            // Dibujar cada ticket en la cuadrícula
             tickets.forEach(ticket => {
                 const cardWrapper = document.createElement('div');
                 cardWrapper.style.display = "flex";
                 cardWrapper.style.flexDirection = "column";
+                cardWrapper.style.alignItems = "center";
 
-                const ticketIdHTML = `ticket-container-${ticket.id}`;
-
-                // IMPORTANTE: Hemos añadido estilos en línea muy específicos para que el PDF no salga en blanco
                 cardWrapper.innerHTML = `
-                    <article id="${ticketIdHTML}" style="border: 2px solid #444; padding: 25px; border-radius: 12px; background-color: #1e1e1e; color: #ffffff; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 300px; font-family: Arial, sans-serif;">
+                    <article class="ticket-card" style="border: 1px solid #444; padding: 20px; border-radius: 12px; background-color: #1e1e1e; color: #ffffff; width: 300px; text-align: center; font-family: 'Inter', sans-serif;">
 
-                        <h2 style="margin: 0; color: #ff4757; text-align: center; text-transform: uppercase; font-size: 1.2rem; width: 100%;">${ticket.eventoTitulo}</h2>
+                        <h2 style="margin: 0 0 10px 0; color: #ff4757; text-transform: uppercase; font-size: 1.2rem;">${ticket.eventoTitulo}</h2>
 
-                        <div style="background: #2a2a2a; padding: 12px; width: 100%; border-radius: 8px; margin: 5px 0; border: 1px solid #333; box-sizing: border-box;">
-                            <p style="margin: 0; font-size: 0.75rem; color: #ff4757; font-weight: bold; text-transform: uppercase;">Asistente</p>
-                            <p style="margin: 2px 0 8px 0; font-weight: bold; font-size: 1rem; color: #ffffff;">${ticket.nombreAsistente}</p>
+                        <div style="background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #333;">
+                            <p style="margin: 0; font-size: 0.7rem; color: #ff4757; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Asistente</p>
+                            <p style="margin: 2px 0 8px 0; font-weight: bold; font-size: 1rem;">${ticket.nombreAsistente}</p>
 
-                            <p style="margin: 0; font-size: 0.75rem; color: #ff4757; font-weight: bold; text-transform: uppercase;">DNI / NIE</p>
-                            <p style="margin: 2px 0 0 0; font-weight: bold; font-size: 1rem; color: #ffffff;">${ticket.documentoAsistente}</p>
+                            <p style="margin: 0; font-size: 0.7rem; color: #ff4757; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">DNI / NIE</p>
+                            <p style="margin: 2px 0 0 0; font-weight: bold; font-size: 1rem;">${ticket.documentoAsistente}</p>
                         </div>
 
-                        <div style="width: 100%; font-size: 0.9rem; color: #ccc; text-align: center;">
-                            <p style="margin: 4px 0;">📅 ${ticket.eventoFecha} | ⏰ ${ticket.eventoHora}</p>
-                            <p style="margin: 4px 0;">📍 Ubicación: General</p>
-                            <p style="margin: 4px 0; font-weight: bold;">Zona: ${ticket.zonaNombre}</p>
-                            <p style="margin: 8px 0; font-size: 1.1rem; color: #2ecc71; font-weight: bold;">Precio: ${ticket.precioPagado} €</p>
+                        <div style="font-size: 0.85rem; color: #ccc; margin-bottom: 15px; line-height: 1.4;">
+                            <p style="margin: 3px 0;">📅 ${ticket.eventoFecha} | ⏰ ${ticket.eventoHora}</p>
+                            <p style="margin: 3px 0;"><strong>Zona:</strong> ${ticket.zonaNombre}</p>
+                            <p style="margin: 10px 0; font-size: 1.1rem; color: #2ecc71; font-weight: bold;">${ticket.precioPagado} €</p>
                         </div>
 
-                        <div id="qr-${ticket.id}" style="background: #ffffff; padding: 10px; border-radius: 8px; display: inline-block;"></div>
+                        <div id="qr-${ticket.id}" style="background: white; padding: 10px; border-radius: 5px; display: inline-block;"></div>
 
-                        <p style="font-size: 0.6rem; color: #666; margin-top: 5px; text-align: center; width: 100%; word-break: break-all;">ID: ${ticket.codigoQr}</p>
+                        <p style="font-size: 0.6rem; color: #666; margin-top: 10px; word-break: break-all;">ID: ${ticket.codigoQr}</p>
                     </article>
 
-                    <button class="btn-pdf" style="margin-top: 10px; margin-bottom: 30px; background: #e67e22; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold;"
-                        onclick="descargarPDF('${ticketIdHTML}', '${ticket.nombreAsistente}')">
-                        📥 Descargar PDF
+                    <button class="btn-pdf"
+                        style="margin-top: 12px; margin-bottom: 35px; background: #e67e22; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 300px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                        onclick="descargarPDF(${ticket.id}, '${ticket.nombreAsistente}')">
+                        <span>📥</span> Descargar Ticket PDF
                     </button>
                 `;
 
                 gridTickets.appendChild(cardWrapper);
 
-                // Generar QR
+                // Generar QR en el navegador (solo para visualización rápida)
                 new QRCode(document.getElementById(`qr-${ticket.id}`), {
                     text: ticket.codigoQr,
-                    width: 130,
-                    height: 130,
+                    width: 120,
+                    height: 120,
                     colorDark : "#000000",
                     colorLight : "#ffffff"
                 });
             });
 
         } catch (error) {
-            console.error("Error:", error);
-            gridTickets.innerHTML = '<p style="color: #ff4757; text-align: center; width: 100%;">Error al cargar tickets.</p>';
+            console.error("Error al cargar tickets:", error);
+            gridTickets.innerHTML = `<p style="color: #ff4757; text-align: center; width: 100%;">Error: ${error.message}</p>`;
         }
     }
 
-    // --- FUNCIÓN MEJORADA PARA GENERAR EL PDF ---
-    window.descargarPDF = (elementoId, nombreAsistente) => {
-        const elemento = document.getElementById(elementoId);
+    /**
+     * Solicita al Backend la generación del PDF real y lo descarga
+     */
+    window.descargarPDF = async (ticketId, nombreAsistente) => {
+        try {
+            // Cambiar texto del botón momentáneamente
+            const btn = event.currentTarget;
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = "<span>⏳</span> Generando...";
+            btn.disabled = true;
 
-        // Configuraciones avanzadas para evitar el "PDF en blanco"
-        const opciones = {
-            margin:       [10, 10],
-            filename:     `Ticket_${nombreAsistente.replace(/\s+/g, '_')}.pdf`,
-            image:        { type: 'jpeg', quality: 1.0 },
-            html2canvas:  {
-                scale: 3, // Mayor calidad
-                useCORS: true,
-                backgroundColor: "#1e1e1e", // Forzamos que el fondo no sea transparente
-                letterRendering: true
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+            const token = Auth.obtenerToken();
+            const baseUrl = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:8080/api';
 
-        // Ejecutar con una pequeña promesa para asegurar que el renderizado sea perfecto
-        html2pdf().set(opciones).from(elemento).save();
+            // Petición al endpoint de Java
+            const response = await fetch(`${baseUrl}/compras/ticket/${ticketId}/pdf`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) throw new Error("No se pudo generar el PDF en el servidor");
+
+            // Recibimos el archivo como un BLOB (Binary Large Object)
+            const blob = await response.blob();
+
+            // Creamos un link invisible para forzar la descarga
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Ticket_Villaticket_${nombreAsistente.replace(/\s+/g, '_')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+
+            // Limpieza
+            a.remove();
+            window.URL.revokeObjectURL(url);
+
+            // Restaurar botón
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+
+        } catch (error) {
+            alert("Error al descargar el ticket: " + error.message);
+            console.error(error);
+        }
     };
 
+    // Configuración del botón de cierre de sesión
     document.getElementById('btnCerrarSesion')?.addEventListener('click', (e) => {
         e.preventDefault();
         Auth.cerrarSesion();
     });
 
+    // Iniciar carga
     cargarTickets();
 });

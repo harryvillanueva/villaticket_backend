@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ProcesarCompra {
@@ -27,10 +25,13 @@ public class ProcesarCompra {
     @Autowired private JpaZonaRepository zonaRepository;
     @Autowired private JpaTicketRepository ticketRepository;
 
+    // Inyectamos nuestras nuevas herramientas
+    @Autowired private GenerarTicketPdf generarTicketPdf;
+    @Autowired private EmailService emailService;
+
     @Transactional
     public List<TicketDTO> ejecutar(CompraRequest request) {
 
-        // La cantidad a comprar ahora es el tamaño de la lista de asistentes
         int cantidadAComprar = request.getAsistentes().size();
 
         UsuarioEntity usuario = usuarioRepository.findByEmail(request.getUsuarioEmail())
@@ -56,7 +57,9 @@ public class ProcesarCompra {
 
         List<TicketDTO> ticketsComprados = new ArrayList<>();
 
-        // Iteramos sobre cada asistente enviado desde el frontend
+        // Un mapa temporal para guardar los PDFs antes de enviarlos
+        Map<String, byte[]> pdfsGenerados = new HashMap<>();
+
         for (CompraRequest.AsistenteDTO asistente : request.getAsistentes()) {
             TicketEntity ticket = new TicketEntity();
             ticket.setCodigoQr(UUID.randomUUID().toString());
@@ -65,8 +68,6 @@ public class ProcesarCompra {
             ticket.setEvento(evento);
             ticket.setZona(zona);
             ticket.setUsuario(usuario);
-
-            // Asignamos los datos nominativos
             ticket.setNombreAsistente(asistente.getNombre());
             ticket.setDocumentoAsistente(asistente.getDocumento());
 
@@ -81,13 +82,28 @@ public class ProcesarCompra {
             dto.setEventoHora(evento.getHora().toString());
             dto.setZonaNombre(zona.getNombre());
             dto.setPrecioPagado(zona.getPrecio());
-
-            // Pasamos los datos al DTO para que el frontend los vea
             dto.setNombreAsistente(ticketGuardado.getNombreAsistente());
             dto.setDocumentoAsistente(ticketGuardado.getDocumentoAsistente());
 
             ticketsComprados.add(dto);
+
+            // --- NUEVO: GENERAR EL PDF EN MEMORIA ---
+            // Llamamos a nuestra clase generadora pasándole el ID recién creado
+            byte[] pdfBytes = generarTicketPdf.ejecutar(ticketGuardado.getId());
+
+            // Creamos un nombre limpio para el archivo PDF
+            String nombreArchivo = "Ticket_" + asistente.getNombre().replace(" ", "_") + ".pdf";
+
+            // Lo guardamos en el mapa temporal
+            pdfsGenerados.put(nombreArchivo, pdfBytes);
         }
+
+        // --- NUEVO: ENVIAR EL CORREO EN SEGUNDO PLANO ---
+        // Lo envolvemos en un hilo nuevo (Thread) para que el servidor responda rápido
+        // a la página web, y el envío del correo se procese de fondo sin hacer esperar al usuario.
+        new Thread(() -> {
+            emailService.enviarCorreoConTickets(usuario.getEmail(), evento.getTitulo(), pdfsGenerados);
+        }).start();
 
         return ticketsComprados;
     }
