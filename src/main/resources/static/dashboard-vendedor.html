@@ -3,33 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Villaticket - Mi Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Panel de Vendedor - Villaticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="auth-body">
-
+<body>
 <nav class="navbar">
     <div class="nav-container">
         <a href="index.html" class="logo-area" style="text-decoration: none;">
-            <span>🎫</span> Villaticket Vendedor
+            <span>🎫</span> Villaticket
         </a>
-        <div class="nav-links">
-            <a href="index.html" class="nav-item">Cartelera</a>
-            <a href="#" class="nav-item" id="btnCerrarSesion" style="color: #ff4757;">Cerrar sesión</a>
+        <div class="nav-links" id="navContainer">
+            <div id="nav-auth-links" style="display: none;"></div>
+            <div id="nav-user-links" style="display: flex; gap: 15px; align-items: center;">
+                <a href="index.html" class="nav-item">Cartelera</a>
+                <a href="escaner.html" class="nav-item" style="color: #4ade80;">📷 Escanear Tickets</a>
+                <a href="#" class="nav-item" id="btnCerrarSesion" style="color: #ff4757;" onclick="Auth.cerrarSesion()">Cerrar sesión</a>
+            </div>
         </div>
     </div>
 </nav>
 
-<div class="container" style="margin-top: 40px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h2 class="section-title" style="margin: 0;">Mis Eventos Creados</h2>
-        <a href="crear-evento.html" class="btn btn-primary">+ Crear Nuevo Evento</a>
+<main class="container" style="margin-top: 100px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 class="section-title" style="margin: 0;">Panel de Control</h1>
+        <a href="crear-evento.html" class="btn btn-primary" style="text-decoration: none;">+ Crear Nuevo Evento</a>
     </div>
 
-    <div class="grid-eventos" id="misEventosGrid">
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="stat-icon"><span class="material-icons-outlined">confirmation_number</span></div>
+            <div class="stat-details">
+                <h3>Tickets Vendidos</h3>
+                <p id="statTicketsTotal">0</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(74, 222, 128, 0.1); color: #4ade80;"><span class="material-icons-outlined">payments</span></div>
+            <div class="stat-details">
+                <h3>Ingresos Estimados</h3>
+                <p id="statIngresosTotal">$0.00</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(96, 165, 250, 0.1); color: #60a5fa;"><span class="material-icons-outlined">event</span></div>
+            <div class="stat-details">
+                <h3>Eventos Creados</h3>
+                <p id="statEventosTotal">0</p>
+            </div>
+        </div>
     </div>
-</div>
+
+    <h2 class="section-title" style="font-size: 1.5rem; margin-top: 40px;">Mis Eventos</h2>
+    <div class="grid-eventos" id="eventosGrid">
+        <p style="color: white; grid-column: 1/-1; text-align: center;">Cargando tus eventos...</p>
+    </div>
+</main>
 
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>

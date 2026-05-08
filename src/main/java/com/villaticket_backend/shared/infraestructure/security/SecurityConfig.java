@@ -4,21 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
-import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -27,60 +23,62 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthFilter;
 
+    @Autowired
+    private AuthenticationProvider authenticationProvider;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // --- LA SOLUCIÓN AL 403 ---
-                        // Dejamos pasar todas las peticiones OPTIONS que hace el navegador por debajo
+                        // 1. Archivos Estáticos y Frontend (Siempre públicos)
+                        .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/uploads/**", "/favicon.ico", "/error").permitAll()
+
+                        // 2. Permitir peticiones OPTIONS (Para evitar bloqueos de CORS del navegador)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 1. Recursos estáticos y vistas
+                        // 3. API Pública (Login, Registro y Visualización de Eventos)
+                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/eventos/publicados", "/api/eventos/categorias", "/api/eventos/{id}").permitAll()
+
+                        // --- SOLUCIÓN AL ERROR 403 DE COMPRA ---
+                        // Permite que cualquier usuario (incluso sin sesión) vea las zonas y precios de un evento
+                        .requestMatchers(HttpMethod.GET, "/api/zonas/evento/**").permitAll()
+
+                        // 4. API Exclusiva del Vendedor
                         .requestMatchers(
-                                "/", "/*.html", "/favicon.ico", "/error", "/css/**", "/js/**", "/img/**", "/assets/**", "/uploads/**"
-                        ).permitAll()
+                                "/api/eventos/vendedor/**",
+                                "/api/eventos/crear",
+                                "/api/eventos/{id}/publicar",
+                                "/api/zonas",
+                                "/api/zonas/**", // POST, PUT, DELETE de zonas siguen estrictamente protegidos
+                                "/api/upload/**",
+                                "/api/tickets/validar/**"
+                        ).hasAnyAuthority("VENDEDOR", "ROLE_VENDEDOR")
 
-                        // 2. Endpoints Públicos
-                        .requestMatchers("/api/users/**", "/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/eventos", "/api/eventos/**", "/api/zonas", "/api/zonas/**").permitAll()
+                        // 5. API para usuarios autenticados (Clientes comprando o viendo sus tickets)
+                        .requestMatchers("/api/compras/**", "/api/tickets/mis-tickets/**").authenticated()
 
-                        // 3. Endpoints Protegidos
-                        .requestMatchers("/api/compras/**").authenticated()
-                        .requestMatchers("/api/upload/**").hasAuthority("VENDEDOR")
-                        .requestMatchers("/api/eventos/**").hasAuthority("VENDEDOR")
-                        .requestMatchers("/api/zonas/**").hasAuthority("VENDEDOR")
-                        .requestMatchers("/api/tickets/**").hasAuthority("VENDEDOR")
-
-                        // 4. Todo lo demás cerrado
+                        // Todo lo demás requiere autenticación por defecto
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowedOrigins(List.of("*"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 }

@@ -1,41 +1,56 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const eventosContainer = document.getElementById('eventosContainer');
+/**
+ * index.js
+ * Carga la cartelera pública de eventos en la página principal.
+ */
 
-    // Si no estamos en una página con este contenedor, terminamos
-    if (!eventosContainer) return;
+document.addEventListener('DOMContentLoaded', async () => {
+    const contenedorEventos = document.getElementById('eventosGrid');
+
+    if (!contenedorEventos) return;
 
     try {
-        const baseUrl = window.location.origin + '/api';
-        const response = await fetch(`${baseUrl}/eventos/publicados`);
+        contenedorEventos.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Cargando cartelera...</p>';
 
-        if (!response.ok) throw new Error("Error al cargar eventos");
+        // CORRECCIÓN: Usamos la ruta de eventos publicados para no tener error 403
+        // Si tu backend usa otra ruta pública, cámbiala aquí.
+        const eventos = await fetchAPI('/eventos/publicados', 'GET');
 
-        const eventos = await response.json();
-        eventosContainer.innerHTML = '';
+        contenedorEventos.innerHTML = '';
 
-        if (eventos.length === 0) {
-            eventosContainer.innerHTML = '<p style="color: white; text-align: center; width: 100%;">No hay eventos disponibles en este momento.</p>';
+        if (!eventos || eventos.length === 0) {
+            contenedorEventos.innerHTML = '<p style="color: #888; text-align: center; grid-column: 1/-1;">No hay eventos disponibles en este momento.</p>';
             return;
         }
 
         eventos.forEach(evento => {
-            const card = document.createElement('div');
-            card.className = 'evento-card';
-            card.innerHTML = `
-                <img src="${evento.imagenUrl || 'https://via.placeholder.com/300x200'}" alt="${evento.titulo}">
-                <div class="evento-info">
-                    <span class="categoria-tag">${evento.categoriaNombre}</span>
-                    <h3>${evento.titulo}</h3>
-                    <p>📅 ${evento.fecha} | ⏰ ${evento.hora}</p>
-                    <p>📍 ${evento.ubicacion}</p>
-                    <a href="detalle-evento.html?id=${evento.id}" class="btn-ver">Ver Entradas</a>
-                </div>
-            `;
-            eventosContainer.appendChild(card);
-        });
+            const id = evento.id;
+            const titulo = evento.titulo || 'Sin título';
+            const fecha = evento.fecha || 'Fecha por definir';
+            const ubicacion = evento.ubicacion || 'Ubicación por definir';
+            const categoria = evento.categoriaNombre || 'General';
 
+            let imagenSrc = evento.imagenUrl || evento.imagen;
+            if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
+                imagenSrc = 'https://via.placeholder.com/400x250?text=Villaticket';
+            }
+
+            contenedorEventos.innerHTML += `
+                <article class="card-evento">
+                    <img src="${imagenSrc}" alt="${titulo}" class="card-img" style="height: 200px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x250?text=Error'">
+                    <div class="card-body">
+                        <span class="card-category">${categoria}</span>
+                        <h3 class="card-title">${titulo}</h3>
+                        <p class="card-info">📅 ${fecha}</p>
+                        <p class="card-info">📍 ${ubicacion}</p>
+                        <div class="card-footer" style="margin-top: 15px;">
+                            <a href="detalle-evento.html?id=${id}" class="btn-primary" style="display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 5px;">Ver Detalles</a>
+                        </div>
+                    </div>
+                </article>
+            `;
+        });
     } catch (error) {
-        console.error("Error:", error);
-        eventosContainer.innerHTML = '<p style="color: #ff4757; text-align: center; width: 100%;">Error al conectar con el servidor.</p>';
+        console.error("Error al cargar la cartelera:", error);
+        contenedorEventos.innerHTML = '<p style="color: #ff4757; text-align: center; grid-column: 1/-1;">Error al conectar con el servidor.</p>';
     }
 });

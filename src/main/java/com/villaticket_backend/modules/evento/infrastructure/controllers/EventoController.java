@@ -29,17 +29,19 @@ public class EventoController {
     private PublicarEvento publicarEvento;
 
     @Autowired
-    private ListarCategorias listarCategorias; // Inyectamos el caso de uso
-    @Autowired private EditarEvento editarEvento; // NUEVO
+    private ListarCategorias listarCategorias;
 
-    // Endpoint: Carga la cartelera pública
-    @GetMapping
+    @Autowired
+    private EditarEvento editarEvento;
+
+    // --- CORRECCIÓN AQUÍ: Se añadió "/publicados" a la ruta ---
+    @GetMapping("/publicados")
     public ResponseEntity<List<EventoDTO>> listarTodosPublicados() {
         List<EventoDTO> eventos = listarEventos.ejecutarPublicos();
         return ResponseEntity.ok(eventos);
     }
 
-    // NUEVO ENDPOINT: Listar categorías para el formulario
+    // Listar categorías para el formulario
     @GetMapping("/categorias")
     public ResponseEntity<List<CategoriaEntity>> listarCategorias() {
         List<CategoriaEntity> categorias = listarCategorias.ejecutar();
@@ -73,9 +75,10 @@ public class EventoController {
         EventoEntity eventoPublicado = publicarEvento.ejecutar(id);
         return ResponseEntity.ok(eventoPublicado);
     }
+
+    // Editar Evento
     @PutMapping("/{id}")
     public ResponseEntity<EventoDTO> editar(@PathVariable Long id, @RequestBody EditarEventoRequest request) {
-        // Ahora devuelve EventoDTO, Jackson no tendrá problemas con Hibernate
         return ResponseEntity.ok(editarEvento.ejecutar(id, request));
     }
 }

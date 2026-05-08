@@ -1,20 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
 
-    // Si ya tiene sesión, redirigir según el flujo inteligente
-    if (Auth.estaAutenticado()) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectPage = urlParams.get('redirect');
-
-        if (redirectPage) {
-            window.location.href = decodeURIComponent(redirectPage);
-        } else {
-            const role = Auth.obtenerRol();
-            window.location.href = (role === 'VENDEDOR') ? 'dashboard-vendedor.html' : 'index.html';
-        }
-        return;
-    }
-
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -22,13 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const password = document.getElementById('password').value;
 
         const btnSubmit = loginForm.querySelector('button[type="submit"]');
-        const originalBtnText = btnSubmit.textContent;
         btnSubmit.disabled = true;
         btnSubmit.textContent = "Verificando...";
 
         try {
             const baseUrl = window.location.origin + '/api';
-
             const response = await fetch(`${baseUrl}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -37,33 +21,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await response.json();
 
+            // LOG DE DEPURACIÓN: Aquí veremos qué manda el servidor exactamente
+            console.log("Respuesta completa del servidor:", data);
+
             if (response.ok) {
-                // Guardar usando las constantes de Auth para evitar errores de dedo
+                localStorage.clear();
+
+                // Intentamos obtener el rol de varias formas por si el nombre cambia
+                const rolDetectado = data.role || data.rol || "CLIENTE";
+
                 localStorage.setItem(Auth.TOKEN_KEY, data.token);
                 localStorage.setItem(Auth.EMAIL_KEY, data.email);
-                localStorage.setItem(Auth.ROLE_KEY, data.role);
+                localStorage.setItem(Auth.ROLE_KEY, rolDetectado);
 
-                // Pequeña espera para que el navegador asiente los datos
+                console.log("Sesión guardada. Rol final:", rolDetectado);
+
                 setTimeout(() => {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirectPage = urlParams.get('redirect');
-
-                    if (redirectPage) {
-                        window.location.href = decodeURIComponent(redirectPage);
+                    const rolFinal = rolDetectado.toUpperCase();
+                    if (rolFinal.includes('VENDEDOR')) {
+                        window.location.href = 'dashboard-vendedor.html';
                     } else {
-                        window.location.href = (data.role === 'VENDEDOR') ? 'dashboard-vendedor.html' : 'index.html';
+                        window.location.href = 'index.html';
                     }
-                }, 100);
+                }, 150);
 
             } else {
                 alert(data.error || "Credenciales incorrectas.");
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = originalBtnText;
+                btnSubmit.textContent = "Iniciar sesión";
             }
         } catch (error) {
+            console.error("Error crítico en login:", error);
             alert("Error de conexión con el servidor.");
             btnSubmit.disabled = false;
-            btnSubmit.textContent = originalBtnText;
         }
     });
 });

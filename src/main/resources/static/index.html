@@ -11,20 +11,28 @@
 <body>
 <nav class="navbar">
     <div class="nav-container">
-        <a href="index.html" class="logo-area" style="text-decoration: none; color: white; font-weight: bold; font-size: 1.5rem;">
-            <span>🎟️</span> Villaticket
+        <a href="index.html" class="logo-area" style="text-decoration: none;">
+            <span>🎫</span> Villaticket
         </a>
-        <div class="nav-links">
-            <a href="index.html" class="nav-item">Cartelera</a>
 
-            <a href="login.html" id="navLogin" class="nav-item">Iniciar Sesión</a>
-            <a href="registro.html" id="navRegistro" class="nav-item">Registrarse</a>
+        <div class="search-bar">
+            <span class="material-icons-outlined">search</span>
+            <input type="text" id="searchInput" placeholder="Buscar conciertos, teatro, deportes...">
+        </div>
 
-            <a href="mis-tickets.html" id="navMisTickets" class="nav-item" style="display: none;">Mis Tickets</a>
+        <div class="nav-links" id="navContainer">
+            <div id="nav-auth-links" style="display: flex; gap: 15px; align-items: center;">
+                <a href="login.html" class="nav-item">Iniciar sesión</a>
+                <a href="registro.html" class="btn btn-primary">Regístrate</a>
+            </div>
 
-            <a href="dashboard-vendedor.html" id="navAdmin" class="nav-item" style="display: none; background: #ff4757; color: white; border-radius: 5px;">Dashboard</a>
+            <div id="nav-user-links" style="display: none; gap: 15px; align-items: center;">
+                <a href="mis-tickets.html" id="navMisTickets" class="nav-item">Mis Entradas</a>
 
-            <a href="#" id="navLogout" class="nav-item" style="display: none; color: #ff4757;" onclick="Auth.cerrarSesion()">Cerrar Sesión</a>
+                <a href="dashboard-vendedor.html" id="navAdmin" class="nav-item" style="display: none; background: #ff4757; color: white; padding: 6px 12px; border-radius: 5px;">Panel Vendedor</a>
+
+                <a href="#" class="nav-item" id="btnCerrarSesion" style="color: #ff4757;" onclick="Auth.cerrarSesion()">Cerrar sesión</a>
+            </div>
         </div>
     </div>
 </nav>
@@ -48,28 +56,6 @@
     <h2 class="section-title">Eventos Destacados</h2>
 
     <div class="grid-eventos" id="eventosGrid">
-
-        <article class="card-evento">
-            <div class="card-image-wrapper">
-                <div class="date-badge">
-                    <span class="date-day">15</span>
-                    <span class="date-month">OCT</span>
-                </div>
-                <img src="https://images.unsplash.com/photo-1540039155732-68ee23e15b51?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Concierto Rock" class="card-img">
-            </div>
-            <div class="card-body">
-                <span class="card-category">CONCIERTO</span>
-                <h3 class="card-title">Festival de Rock Indie 2026</h3>
-                <div class="card-info">
-                    <span class="material-icons-outlined" style="font-size: 16px;">place</span>
-                    <span>Estadio Nacional, Madrid</span>
-                </div>
-                <div class="card-footer">
-                    <div class="price-tag">Desde <br><span class="price-amount">45€</span></div>
-                    <button class="btn-buy-card">Ver Entradas</button>
-                </div>
-            </div>
-        </article>
     </div>
 </main>
 
@@ -98,5 +84,6 @@
 
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/index.js"></script> </body>
+<script src="js/index.js"></script>
+</body>
 </html>

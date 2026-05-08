@@ -1,60 +1,86 @@
 const Auth = {
+    // Definición de las llaves exactas con las que guardamos los datos en login.js
     TOKEN_KEY: 'villaticket_token',
     EMAIL_KEY: 'villaticket_email',
     ROLE_KEY: 'villaticket_role',
 
+    /**
+     * Verifica si existe una sesión válida comprobando el token.
+     */
     estaAutenticado() {
         const token = localStorage.getItem(this.TOKEN_KEY);
+        // Retorna true solo si hay un token válido (ignora los nulos o vacíos)
         return token !== null && token !== undefined && token !== 'null' && token !== '';
     },
 
+    /**
+     * Devuelve el Token JWT actual.
+     * Fundamental para que fetch() pueda pedir datos protegidos a Spring Boot.
+     */
     obtenerToken() {
         return localStorage.getItem(this.TOKEN_KEY);
     },
 
-    obtenerRol() {
-        return localStorage.getItem(this.ROLE_KEY);
+    /**
+     * Devuelve el email del usuario logueado.
+     */
+    obtenerEmail() {
+        return localStorage.getItem(this.EMAIL_KEY);
     },
 
+    /**
+     * Devuelve el rol asegurándose de ignorar la palabra "undefined" si ocurriera un error.
+     */
+    obtenerRol() {
+        const rol = localStorage.getItem(this.ROLE_KEY);
+        if (rol === 'undefined' || !rol) return null;
+        return rol;
+    },
+
+    /**
+     * Cierra la sesión eliminando todo el rastro en el navegador y manda al login.
+     */
     cerrarSesion() {
-        localStorage.removeItem(this.TOKEN_KEY);
-        localStorage.removeItem(this.EMAIL_KEY);
-        localStorage.removeItem(this.ROLE_KEY);
+        localStorage.clear();
         window.location.href = 'login.html';
     },
 
     /**
-     * Gestiona la visibilidad del menú de forma segura.
-     * Si un ID no existe en el HTML de la página actual, el código no se rompe.
+     * Dibuja y oculta las partes del menú según quién esté navegando.
      */
     actualizarMenu() {
         const estaLogueado = this.estaAutenticado();
-        const rol = this.obtenerRol();
+        const rolRaw = this.obtenerRol();
 
-        // Buscamos los elementos por ID
-        const linkLogin = document.getElementById('navLogin');
-        const linkRegistro = document.getElementById('navRegistro');
-        const linkLogout = document.getElementById('navLogout');
-        const linkMisTickets = document.getElementById('navMisTickets');
-        const linkAdmin = document.getElementById('navAdmin');
+        // Línea de depuración para la consola
+        console.log("🔍 Verificando Menú:", { estaLogueado, rol: rolRaw });
 
-        // Aplicamos cambios solo si el elemento existe en el DOM actual
-        if (linkLogin) linkLogin.style.display = estaLogueado ? 'none' : 'block';
-        if (linkRegistro) linkRegistro.style.display = estaLogueado ? 'none' : 'block';
-        if (linkLogout) linkLogout.style.display = estaLogueado ? 'block' : 'none';
+        // Identificamos todos los botones y secciones del menú en el HTML
+        const navAuth = document.getElementById('nav-auth-links'); // Iniciar Sesión / Registro
+        const navUser = document.getElementById('nav-user-links'); // Contenedor para logueados
+        const linkAdmin = document.getElementById('navAdmin');     // Panel Vendedor
+        const linkMisTickets = document.getElementById('navMisTickets'); // Mis Tickets
 
-        if (linkMisTickets) {
-            linkMisTickets.style.display = estaLogueado ? 'block' : 'none';
-        }
+        // Lógica de visibilidad general
+        if (navAuth) navAuth.style.display = estaLogueado ? 'none' : 'flex';
+        if (navUser) navUser.style.display = estaLogueado ? 'flex' : 'none';
 
-        if (linkAdmin) {
-            // Verificamos que sea VENDEDOR (en mayúsculas como viene del backend)
-            linkAdmin.style.display = (estaLogueado && rol === 'VENDEDOR') ? 'block' : 'none';
+        // Lógica específica basada en el Rol
+        if (estaLogueado && rolRaw) {
+            // Pasamos a mayúsculas para evitar errores tipográficos
+            const rol = rolRaw.toUpperCase();
+            const esVendedor = rol.includes('VENDEDOR');
+
+            // El Dashboard solo se muestra si el usuario es Vendedor
+            if (linkAdmin) linkAdmin.style.display = esVendedor ? 'block' : 'none';
+
+            // Los clientes ven sus tickets
+            if (linkMisTickets) linkMisTickets.style.display = esVendedor ? 'none' : 'block';
         }
     }
 };
 
-// Se ejecuta automáticamente al cargar la página
+// Autoejecutar la función del menú cada vez que se carga un HTML
 document.addEventListener('DOMContentLoaded', () => {
     Auth.actualizarMenu();
 });
