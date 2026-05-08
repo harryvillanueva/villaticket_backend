@@ -781,3 +781,30 @@ body {
     border-radius: 4px;
     transition: width 0.5s ease-in-out;
 }
+
+
+/* =========================================
+   CONTENEDOR DEL GRÁFICO (CHART.JS)
+   ========================================= */
+.chart-section {
+    background: #2a2a35;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 40px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.chart-section h3 {
+    color: #ffffff;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}

@@ -55,11 +55,20 @@
         </div>
     </div>
 
-    <h2 class="section-title" style="font-size: 1.5rem; margin-top: 40px;">Mis Eventos</h2>
+    <div class="chart-section" id="chartSection" style="display: none;">
+        <h3>Rendimiento Financiero por Evento</h3>
+        <div class="chart-container">
+            <canvas id="ingresosChart"></canvas>
+        </div>
+    </div>
+
+    <h2 class="section-title" style="font-size: 1.5rem; margin-top: 20px;">Mis Eventos</h2>
     <div class="grid-eventos" id="eventosGrid">
         <p style="color: white; grid-column: 1/-1; text-align: center;">Cargando tus eventos...</p>
     </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
