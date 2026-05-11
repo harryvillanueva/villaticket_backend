@@ -34,6 +34,9 @@ public class EventoController {
     @Autowired
     private EditarEvento editarEvento;
 
+    @Autowired
+    private OcultarEvento ocultarEvento;
+
     // --- CORRECCIÓN AQUÍ: Se añadió "/publicados" a la ruta ---
     @GetMapping("/publicados")
     public ResponseEntity<List<EventoDTO>> listarTodosPublicados() {
@@ -80,5 +83,11 @@ public class EventoController {
     @PutMapping("/{id}")
     public ResponseEntity<EventoDTO> editar(@PathVariable Long id, @RequestBody EditarEventoRequest request) {
         return ResponseEntity.ok(editarEvento.ejecutar(id, request));
+    }
+
+    @PutMapping("/{id}/ocultar")
+    public ResponseEntity<EventoEntity> ocultar(@PathVariable Long id) {
+        EventoEntity eventoOculto = ocultarEvento.ejecutar(id);
+        return ResponseEntity.ok(eventoOculto);
     }
 }

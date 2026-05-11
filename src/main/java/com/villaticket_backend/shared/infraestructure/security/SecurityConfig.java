@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // 3. API Pública (Login, Registro y Visualización de Eventos)
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/auth/**","/api/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/eventos/publicados", "/api/eventos/categorias", "/api/eventos/{id}").permitAll()
 
                         // --- SOLUCIÓN AL ERROR 403 DE COMPRA ---
@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/api/eventos/vendedor/**",
                                 "/api/eventos/crear",
                                 "/api/eventos/{id}/publicar",
+                                "/api/eventos/{id}/ocultar",
                                 "/api/zonas",
                                 "/api/zonas/**", // POST, PUT, DELETE de zonas siguen estrictamente protegidos
                                 "/api/upload/**",

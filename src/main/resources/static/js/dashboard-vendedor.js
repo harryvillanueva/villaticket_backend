@@ -1,4 +1,4 @@
-// Variable global para almacenar el gráfico y poder actualizarlo sin que se superponga
+// Variable global para almacenar el gráfico
 let graficoIngresos = null;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,14 +22,12 @@ async function cargarDashboard() {
         if (!eventos || eventos.length === 0) {
             contenedorEventos.innerHTML = '<p style="color: #888; grid-column: 1/-1; text-align: center;">Aún no has creado ningún evento. ¡Empieza ahora!</p>';
             actualizarEstadisticas(0, 0, 0);
-            chartSection.style.display = 'none'; // Ocultamos el gráfico si no hay eventos
+            if(chartSection) chartSection.style.display = 'none';
             return;
         }
 
         let totalTicketsVendidosGlobal = 0;
         let totalIngresosGlobal = 0;
-
-        // Arrays para alimentar el Gráfico de Chart.js
         const nombresDeEventos = [];
         const ingresosPorEvento = [];
 
@@ -50,12 +48,10 @@ async function cargarDashboard() {
                         const precio = zona.precio || 0;
 
                         const vendidos = capacidad - disponibles;
-
                         ticketsVendidosEvento += vendidos;
                         ingresosEvento += (vendidos * precio);
 
                         const porcentaje = capacidad > 0 ? (vendidos / capacidad) * 100 : 0;
-
                         let colorBarra = '#4ade80';
                         if (porcentaje > 75) colorBarra = '#fbbf24';
                         if (porcentaje > 95) colorBarra = '#ff4757';
@@ -80,8 +76,6 @@ async function cargarDashboard() {
 
             totalTicketsVendidosGlobal += ticketsVendidosEvento;
             totalIngresosGlobal += ingresosEvento;
-
-            // Guardamos los datos para el gráfico
             nombresDeEventos.push(evento.titulo || 'Sin título');
             ingresosPorEvento.push(ingresosEvento);
 
@@ -95,11 +89,33 @@ async function cargarDashboard() {
                 imagenSrc = 'https://via.placeholder.com/400x250?text=Villaticket';
             }
 
+            // --- LÓGICA DE CADUCIDAD AUTOMÁTICA ---
+            let estaCaducado = false;
+            if (fecha && fecha !== 'Fecha por definir') {
+                const partes = fecha.split('-'); // Asume formato YYYY-MM-DD
+                if (partes.length === 3) {
+                    const fechaEventoLocal = new Date(partes[0], partes[1] - 1, partes[2]);
+                    const hoy = new Date();
+                    hoy.setHours(0, 0, 0, 0); // Limpiamos la hora para comparar solo días
+                    if (fechaEventoLocal < hoy) {
+                        estaCaducado = true;
+                    }
+                }
+            }
+
             let badgeEstado = '';
-            if(estado === 'PUBLICADO') {
+            let botonAccion = '';
+
+            // --- RENDERIZADO INTELIGENTE DE BOTONES ---
+            if (estaCaducado) {
+                badgeEstado = '<span style="background: #3f3f46; color: #a1a1aa; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">CADUCADO</span>';
+                // No mostramos botón de publicar/ocultar porque ya pasó la fecha
+            } else if (estado === 'PUBLICADO') {
                 badgeEstado = '<span style="background: #4ade80; color: #14532d; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">PUBLICADO</span>';
+                botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Ocultar</button>`;
             } else {
                 badgeEstado = '<span style="background: #fbbf24; color: #78350f; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">BORRADOR</span>';
+                botonAccion = `<button onclick="publicarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #4ade80; color: #14532d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Publicar</button>`;
             }
 
             contenedorEventos.innerHTML += `
@@ -117,9 +133,10 @@ async function cargarDashboard() {
                         </div>
                     </div>
 
-                    <div class="card-footer" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px;">
-                        <a href="editar-evento.html?id=${id}" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px;">Editar</a>
-                        <a href="gestionar-zonas.html?id=${id}" class="btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px;">Zonas</a>
+                    <div class="card-footer" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px; flex-wrap: wrap;">
+                        <a href="editar-evento.html?id=${id}" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px; min-width: 80px;">Editar</a>
+                        <a href="gestionar-zonas.html?id=${id}" class="btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px; min-width: 80px;">Zonas</a>
+                        ${botonAccion}
                     </div>
                 </article>
             `;
@@ -127,9 +144,10 @@ async function cargarDashboard() {
 
         actualizarEstadisticas(totalTicketsVendidosGlobal, totalIngresosGlobal, eventos.length);
 
-        // Mostramos la sección del gráfico y lo dibujamos
-        chartSection.style.display = 'block';
-        dibujarGrafico(nombresDeEventos, ingresosPorEvento);
+        if(chartSection) {
+            chartSection.style.display = 'block';
+            dibujarGrafico(nombresDeEventos, ingresosPorEvento);
+        }
 
     } catch (error) {
         console.error("Error al cargar dashboard:", error);
@@ -139,54 +157,70 @@ async function cargarDashboard() {
 
 function actualizarEstadisticas(tickets, ingresos, eventos) {
     document.getElementById('statTicketsTotal').textContent = tickets.toLocaleString();
-    document.getElementById('statIngresosTotal').textContent = `${ingresos.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}€`;
+    document.getElementById('statIngresosTotal').textContent = `${ingresos.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} €`;
     document.getElementById('statEventosTotal').textContent = eventos;
 }
 
-/**
- * Función que instancia Chart.js y dibuja el gráfico de barras
- */
 function dibujarGrafico(etiquetas, datos) {
-    const ctx = document.getElementById('ingresosChart').getContext('2d');
+    const canvas = document.getElementById('ingresosChart');
+    if (!canvas) return;
 
-    // Si ya existe un gráfico anterior, lo destruimos para evitar parpadeos al recargar
+    const ctx = canvas.getContext('2d');
+
     if (graficoIngresos) {
         graficoIngresos.destroy();
     }
 
-    // Configuramos el nuevo gráfico
     graficoIngresos = new Chart(ctx, {
-        type: 'bar', // Tipo de gráfico: Barras
+        type: 'bar',
         data: {
-            labels: etiquetas, // Los nombres de los eventos
+            labels: etiquetas,
             datasets: [{
                 label: 'Ingresos Estimados (€)',
-                data: datos, // El dinero recaudado por evento
-                backgroundColor: 'rgba(74, 222, 128, 0.7)', // Verde semi-transparente
-                borderColor: '#4ade80', // Verde sólido
+                data: datos,
+                backgroundColor: 'rgba(74, 222, 128, 0.7)',
+                borderColor: '#4ade80',
                 borderWidth: 1,
-                borderRadius: 4 // Bordes redondeados para un look moderno
+                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // Permite que se ajuste a la altura del contenedor
-            plugins: {
-                legend: {
-                    labels: { color: '#ffffff' } // Texto de la leyenda en blanco
-                }
-            },
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#ffffff' } } },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: { color: 'rgba(255, 255, 255, 0.1)' }, // Líneas divisorias tenues
-                    ticks: { color: '#a1a1aa' } // Números del eje Y en gris claro
-                },
-                x: {
-                    grid: { display: false }, // Ocultamos las líneas verticales
-                    ticks: { color: '#a1a1aa' } // Texto del eje X en gris claro
-                }
+                y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.1)' }, ticks: { color: '#a1a1aa' } },
+                x: { grid: { display: false }, ticks: { color: '#a1a1aa' } }
             }
         }
     });
+}
+
+async function publicarEvento(idEvento) {
+    if (!confirm("¿Estás seguro de que deseas publicar este evento? Será visible para todos los clientes.")) {
+        return;
+    }
+    try {
+        await fetchAPI(`/eventos/${idEvento}/publicar`, 'PUT');
+        alert("¡Evento publicado con éxito!");
+        cargarDashboard();
+    } catch (error) {
+        console.error("Error al publicar evento:", error);
+        alert("Hubo un error al intentar publicar el evento: " + error.message);
+    }
+}
+
+// --- NUEVA FUNCIÓN PARA OCULTAR EL EVENTO ---
+async function ocultarEvento(idEvento) {
+    if (!confirm("¿Deseas ocultar este evento? Pasará a ser un Borrador y los clientes no podrán verlo ni comprar tickets.")) {
+        return;
+    }
+    try {
+        await fetchAPI(`/eventos/${idEvento}/ocultar`, 'PUT');
+        alert("El evento ha sido ocultado exitosamente.");
+        cargarDashboard();
+    } catch (error) {
+        console.error("Error al ocultar evento:", error);
+        alert("Hubo un error al intentar ocultar el evento: " + error.message);
+    }
 }
