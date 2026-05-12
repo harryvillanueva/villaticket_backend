@@ -808,3 +808,83 @@ body {
     height: 300px;
     width: 100%;
 }
+
+/* =========================================
+   MENÚ RESPONSIVO (MÓVIL)
+   ========================================= */
+
+/* Botón de hamburguesa (oculto por defecto en PC) */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    background: none;
+    border: none;
+    z-index: 1001;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: flex; /* Aparece en móviles */
+    }
+
+    .nav-links {
+        display: none; /* Se oculta el menú horizontal */
+        flex-direction: column;
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: #1a1a2e;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 10px 15px rgba(0,0,0,0.5);
+    }
+
+    /* Clase que se activa al hacer clic en la hamburguesa */
+    .nav-links.active {
+        display: flex;
+        animation: fadeInDown 0.3s ease forwards;
+    }
+
+    .nav-item {
+        width: 100%;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    #nav-user-links, #nav-auth-links {
+        flex-direction: column;
+        width: 100%;
+        gap: 0;
+    }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilo para el botón de categoría activo */
+.cat-btn.active {
+    background-color: #ff4757 !important;
+    color: white !important;
+    border-color: #ff4757 !important;
+    box-shadow: 0 0 10px rgba(255, 71, 87, 0.4);
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #ff4757;
+    box-shadow: 0 0 8px rgba(255, 71, 87, 0.2);
+}
