@@ -92,11 +92,11 @@ async function cargarDashboard() {
             // --- LÓGICA DE CADUCIDAD AUTOMÁTICA ---
             let estaCaducado = false;
             if (fecha && fecha !== 'Fecha por definir') {
-                const partes = fecha.split('-'); // Asume formato YYYY-MM-DD
+                const partes = fecha.split('-');
                 if (partes.length === 3) {
                     const fechaEventoLocal = new Date(partes[0], partes[1] - 1, partes[2]);
                     const hoy = new Date();
-                    hoy.setHours(0, 0, 0, 0); // Limpiamos la hora para comparar solo días
+                    hoy.setHours(0, 0, 0, 0);
                     if (fechaEventoLocal < hoy) {
                         estaCaducado = true;
                     }
@@ -106,10 +106,13 @@ async function cargarDashboard() {
             let badgeEstado = '';
             let botonAccion = '';
 
-            // --- RENDERIZADO INTELIGENTE DE BOTONES ---
+            // --- RENDERIZADO INTELIGENTE DE BOTONES (ACTUALIZADO) ---
             if (estaCaducado) {
                 badgeEstado = '<span style="background: #3f3f46; color: #a1a1aa; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">CADUCADO</span>';
-                // No mostramos botón de publicar/ocultar porque ya pasó la fecha
+                // Solo si el evento caducado seguía público, le permitimos ocultarlo para limpiar la cartelera
+                if (estado === 'PUBLICADO') {
+                    botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Ocultar</button>`;
+                }
             } else if (estado === 'PUBLICADO') {
                 badgeEstado = '<span style="background: #4ade80; color: #14532d; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">PUBLICADO</span>';
                 botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Ocultar</button>`;
@@ -210,7 +213,6 @@ async function publicarEvento(idEvento) {
     }
 }
 
-// --- NUEVA FUNCIÓN PARA OCULTAR EL EVENTO ---
 async function ocultarEvento(idEvento) {
     if (!confirm("¿Deseas ocultar este evento? Pasará a ser un Borrador y los clientes no podrán verlo ni comprar tickets.")) {
         return;

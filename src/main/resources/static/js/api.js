@@ -1,14 +1,13 @@
 // js/api.js
 const API_URL = window.location.origin + '/api';
 
-// Função genérica para fazer requisições JSON
+// Función genérica para hacer peticiones JSON al Backend
 async function fetchAPI(endpoint, method = 'GET', body = null) {
     const headers = {
         'Content-Type': 'application/json'
     };
 
-    // --- A SOLUÇÃO ESTÁ AQUI ---
-    // Pegamos o token do localStorage e adicionamos ao cabeçalho (Header) da requisição
+    // Extraemos el token del almacenamiento y lo enviamos en los Headers
     const token = localStorage.getItem('villaticket_token');
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -26,13 +25,20 @@ async function fetchAPI(endpoint, method = 'GET', body = null) {
     try {
         const response = await fetch(`${API_URL}${endpoint}`, options);
 
-        // Se o backend retorna um erro (400, 401, 403, 500)
         if (!response.ok) {
+            // --- NUEVO: Interceptor de Sesión Expirada (Protección contra 401/403) ---
+            if (response.status === 401 || response.status === 403) {
+                alert("Tu sesión ha expirado por seguridad o no tienes permisos. Por favor, inicia sesión nuevamente.");
+                localStorage.clear(); // Limpiamos la sesión vieja
+                window.location.href = 'login.html'; // Lo mandamos a loguearse
+                throw new Error("Sesión expirada");
+            }
+
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || `Error en la petición: ${response.status}`);
+            // Tomamos errorData.message o errorData.error dependiendo de lo que mande Spring
+            throw new Error(errorData.message || errorData.error || `Error en la petición: ${response.status}`);
         }
 
-        // Se a resposta for vazia (ex. 204 No Content), não tentamos fazer o parse do JSON
         if (response.status === 204) return null;
 
         return await response.json();
