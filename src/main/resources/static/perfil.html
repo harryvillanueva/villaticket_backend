@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Villaticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="logo-area" style="text-decoration: none;"><span>🎫</span> Villaticket</a>
+        <div class="nav-links">
+            <div id="nav-user-links" style="display: flex; gap: 15px; align-items: center;">
+                <img id="userAvatarMenu" src="" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #ff4757; display: none;">
+                <a href="index.html" class="nav-item">Cartelera</a>
+                <a href="#" class="nav-item" onclick="Auth.cerrarSesion()" style="color: #ff4757;">Cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container" style="margin-top: 100px; max-width: 600px;">
+    <h1 class="section-title">Configuración de Perfil</h1>
+
+    <div class="card-evento" style="padding: 25px; background: #2a2a35;">
+        <form id="perfilForm">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img id="avatarPreview" src="https://via.placeholder.com/120" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #ff4757;">
+                <br><br>
+                <label class="btn-secondary" style="padding: 5px 15px; font-size: 0.8rem; cursor: pointer;">
+                    Cambiar Foto de Perfil
+                    <input type="file" id="avatarInput" hidden accept="image/*">
+                </label>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #a1a1aa; display: block; margin-bottom: 5px;">Nombre Completo</label>
+                <input type="text" id="perfilNombre" required style="width: 100%; padding: 10px; border-radius: 5px; background: #1a1a2e; color: white; border: 1px solid #444;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #a1a1aa; display: block; margin-bottom: 5px;">Correo Electrónico</label>
+                <input type="email" id="perfilEmail" disabled style="width: 100%; padding: 10px; border-radius: 5px; background: #1a1a2e; color: #888; border: 1px solid #444;">
+            </div>
+
+            <div id="seccionIban" style="display: none; margin-bottom: 20px;">
+                <label style="color: #4ade80; display: block; margin-bottom: 5px;">Cuenta IBAN para cobros</label>
+                <input type="text" id="perfilIban" placeholder="ES00 0000 0000 0000 0000 0000" style="width: 100%; padding: 10px; border-radius: 5px; background: #1a1a2e; color: white; border: 1px solid #4ade80;">
+                <small style="color: #888;">Este campo solo es visible para vendedores.</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Actualizar Mis Datos</button>
+        </form>
+    </div>
+
+    <h2 class="section-title" style="margin-top: 30px; font-size: 1.2rem;">Seguridad</h2>
+    <div class="card-evento" style="padding: 25px; background: #2a2a35; margin-bottom: 50px;">
+        <form id="passwordForm">
+            <input type="password" id="passActual" placeholder="Contraseña Actual" required style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #1a1a2e; color: white; border: 1px solid #444;">
+            <input type="password" id="passNueva" placeholder="Nueva Contraseña" required style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; background: #1a1a2e; color: white; border: 1px solid #444;">
+            <button type="submit" class="btn btn-secondary" style="width: 100%;">Cambiar Contraseña</button>
+        </form>
+    </div>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/perfil.js"></script>
+</body>
+</html>

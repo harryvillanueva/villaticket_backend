@@ -1,3 +1,4 @@
+// js/auth.js
 const Auth = {
     TOKEN_KEY: 'villaticket_token',
     EMAIL_KEY: 'villaticket_email',
@@ -27,44 +28,46 @@ const Auth = {
         window.location.href = 'login.html';
     },
 
-    actualizarMenu() {
+    async actualizarMenu() {
         const estaLogueado = this.estaAutenticado();
-        const rolRaw = this.obtenerRol();
-
         const navAuth = document.getElementById('nav-auth-links');
         const navUser = document.getElementById('nav-user-links');
         const linkAdmin = document.getElementById('navAdmin');
-        const linkMisTickets = document.getElementById('navMisTickets');
+        const imgMenu = document.getElementById('userAvatarMenu');
 
-        // Mostramos/ocultamos bloques generales
         if (navAuth) navAuth.style.display = estaLogueado ? 'none' : 'flex';
         if (navUser) navUser.style.display = estaLogueado ? 'flex' : 'none';
 
-        if (estaLogueado && rolRaw) {
-            const rol = rolRaw.toUpperCase();
-            const esVendedor = rol.includes('VENDEDOR');
+        if (estaLogueado) {
+            const rolRaw = this.obtenerRol();
+            if (rolRaw && linkAdmin) {
+                const rol = rolRaw.toUpperCase();
+                linkAdmin.style.display = rol.includes('VENDEDOR') ? 'block' : 'none';
+            }
 
-            // --- CORRECCIÓN DE NAVEGACIÓN ---
-            // 1. El panel de vendedor solo sale si es VENDEDOR
-            if (linkAdmin) linkAdmin.style.display = esVendedor ? 'block' : 'none';
-
-            // 2. "Mis Tickets" ahora sale SIEMPRE que estés logueado (seas vendedor o cliente)
-            if (linkMisTickets) linkMisTickets.style.display = 'block';
+            // Cargamos la foto de perfil si existe el elemento en el HTML
+            if (imgMenu) {
+                try {
+                    const perfil = await fetchAPI('/users/profile', 'GET');
+                    if (perfil.urlAvatar) {
+                        imgMenu.src = perfil.urlAvatar;
+                        imgMenu.style.display = 'block';
+                    }
+                } catch (e) { console.warn("No se pudo cargar avatar en menú"); }
+            }
         }
     }
 };
 
+// --- SOLUCIÓN AL REFERENCE ERROR: Lo hacemos explícitamente global ---
+window.Auth = Auth;
+
 document.addEventListener('DOMContentLoaded', () => {
     Auth.actualizarMenu();
 
-    // --- LÓGICA PARA EL MENÚ MÓVIL ---
-    // Añadimos un listener para el botón de hamburguesa que pondremos en el HTML
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.querySelector('.nav-links');
-
     if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-        });
+        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
     }
 });

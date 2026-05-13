@@ -4,45 +4,45 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/upload")
 public class UploadController {
 
-    // Nombre de la carpeta en la raíz de tu proyecto donde se guardarán las fotos
-    private final String UPLOAD_DIR = "uploads/";
+    private final String uploadDir = "uploads/";
 
     @PostMapping
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("El archivo está vacío");
+            return ResponseEntity.badRequest().body(Map.of("error", "Archivo vacío"));
         }
 
         try {
-            // 1. Crear la carpeta "uploads" si no existe
-            File directorio = new File(UPLOAD_DIR);
-            if (!directorio.exists()) {
-                directorio.mkdirs();
+            // Crear el directorio si no existe
+            Path pathDir = Paths.get(uploadDir);
+            if (!Files.exists(pathDir)) {
+                Files.createDirectories(pathDir);
             }
 
-            // 2. Generar un nombre único para evitar que fotos con el mismo nombre se sobreescriban
-            String nombreUnico = UUID.randomUUID().toString() + "_" + file.getOriginalFilename().replaceAll(" ", "_");
-            Path rutaDestino = Paths.get(UPLOAD_DIR + nombreUnico);
+            // Generar un nombre único para evitar duplicados
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path path = Paths.get(uploadDir + fileName);
 
-            // 3. Copiar el archivo físicamente al servidor
-            Files.copy(file.getInputStream(), rutaDestino);
+            // Guardar el archivo
+            Files.write(path, file.getBytes());
 
-            // 4. Devolver la URL estática que usará el frontend
-            return ResponseEntity.ok("/uploads/" + nombreUnico);
+            // --- SOLUCIÓN: Retornamos un objeto JSON con la URL ---
+            String fileUrl = "/uploads/" + fileName;
+            return ResponseEntity.ok(Map.of("url", fileUrl));
 
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().body("Error al subir el archivo");
+            return ResponseEntity.status(500).body(Map.of("error", "Error al subir archivo: " + e.getMessage()));
         }
     }
 }

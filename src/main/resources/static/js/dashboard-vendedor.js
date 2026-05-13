@@ -84,12 +84,20 @@ async function cargarDashboard() {
             const fecha = evento.fecha || 'Fecha por definir';
             const estado = evento.estado || 'BORRADOR';
 
+            // --- CORRECCIÓN DE IMAGEN ---
+            // Revisamos tanto imagenUrl como imagen (nombres comunes en tu DTO)
             let imagenSrc = evento.imagenUrl || evento.imagen;
-            if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
-                imagenSrc = 'https://via.placeholder.com/400x250?text=Villaticket';
+
+            // Si la ruta es relativa (ej: /uploads/...), le ponemos el origen del servidor
+            if (imagenSrc && imagenSrc.startsWith('/')) {
+                imagenSrc = window.location.origin + imagenSrc;
             }
 
-            // --- LÓGICA DE CADUCIDAD AUTOMÁTICA ---
+            // Si no hay imagen, usamos un placeholder que no dependa de servicios externos que fallan
+            if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
+                imagenSrc = 'css/img/no-image.png'; // Asegúrate de tener una imagen local o usa un div de color
+            }
+
             let estaCaducado = false;
             if (fecha && fecha !== 'Fecha por definir') {
                 const partes = fecha.split('-');
@@ -106,25 +114,25 @@ async function cargarDashboard() {
             let badgeEstado = '';
             let botonAccion = '';
 
-            // --- RENDERIZADO INTELIGENTE DE BOTONES (ACTUALIZADO) ---
             if (estaCaducado) {
                 badgeEstado = '<span style="background: #3f3f46; color: #a1a1aa; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">CADUCADO</span>';
-                // Solo si el evento caducado seguía público, le permitimos ocultarlo para limpiar la cartelera
                 if (estado === 'PUBLICADO') {
-                    botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Ocultar</button>`;
+                    botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;">Ocultar</button>`;
                 }
             } else if (estado === 'PUBLICADO') {
                 badgeEstado = '<span style="background: #4ade80; color: #14532d; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">PUBLICADO</span>';
-                botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Ocultar</button>`;
+                botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;">Ocultar</button>`;
             } else {
                 badgeEstado = '<span style="background: #fbbf24; color: #78350f; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">BORRADOR</span>';
-                botonAccion = `<button onclick="publicarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #4ade80; color: #14532d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Publicar</button>`;
+                botonAccion = `<button onclick="publicarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #4ade80; color: #14532d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;">Publicar</button>`;
             }
 
             contenedorEventos.innerHTML += `
                 <article class="card-evento" style="display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <img src="${imagenSrc}" alt="${titulo}" class="card-img" style="height: 180px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x250?text=Imagen+No+Disponible'">
+                        <div style="height: 180px; background: #333; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                            <img src="${imagenSrc}" alt="${titulo}" class="card-img" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
                         <div class="card-body">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span class="card-category">${evento.categoriaNombre || 'General'}</span>
@@ -200,29 +208,23 @@ function dibujarGrafico(etiquetas, datos) {
 }
 
 async function publicarEvento(idEvento) {
-    if (!confirm("¿Estás seguro de que deseas publicar este evento? Será visible para todos los clientes.")) {
-        return;
-    }
+    if (!confirm("¿Estás seguro de que deseas publicar este evento?")) return;
     try {
         await fetchAPI(`/eventos/${idEvento}/publicar`, 'PUT');
         alert("¡Evento publicado con éxito!");
         cargarDashboard();
     } catch (error) {
-        console.error("Error al publicar evento:", error);
-        alert("Hubo un error al intentar publicar el evento: " + error.message);
+        alert("Hubo un error: " + error.message);
     }
 }
 
 async function ocultarEvento(idEvento) {
-    if (!confirm("¿Deseas ocultar este evento? Pasará a ser un Borrador y los clientes no podrán verlo ni comprar tickets.")) {
-        return;
-    }
+    if (!confirm("¿Deseas ocultar este evento?")) return;
     try {
         await fetchAPI(`/eventos/${idEvento}/ocultar`, 'PUT');
         alert("El evento ha sido ocultado exitosamente.");
         cargarDashboard();
     } catch (error) {
-        console.error("Error al ocultar evento:", error);
-        alert("Hubo un error al intentar ocultar el evento: " + error.message);
+        alert("Hubo un error: " + error.message);
     }
 }

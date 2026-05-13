@@ -32,36 +32,33 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Archivos Estáticos y Frontend (Siempre públicos)
+                        // 1. Recursos estáticos y frontend
                         .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/uploads/**", "/favicon.ico", "/error").permitAll()
-
-                        // 2. Permitir peticiones OPTIONS (Para evitar bloqueos de CORS del navegador)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 3. API Pública (Login, Registro y Visualización de Eventos)
-                        .requestMatchers("/api/auth/**","/api/users/register").permitAll()
+                        // 2. Rutas Públicas de la API
+                        .requestMatchers("/api/auth/**", "/api/users/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/eventos/publicados", "/api/eventos/categorias", "/api/eventos/{id}").permitAll()
-
-                        // --- SOLUCIÓN AL ERROR 403 DE COMPRA ---
-                        // Permite que cualquier usuario (incluso sin sesión) vea las zonas y precios de un evento
                         .requestMatchers(HttpMethod.GET, "/api/zonas/evento/**").permitAll()
 
-                        // 4. API Exclusiva del Vendedor
+                        // 3. Rutas para CUALQUIER usuario logueado (CLIENTE o VENDEDOR)
+                        // IMPORTANTE: Ponemos esto ANTES de las reglas específicas de Vendedor
+                        .requestMatchers("/api/users/profile/**").authenticated()
+                        .requestMatchers("/api/compras/**").authenticated()
+                        .requestMatchers("/api/tickets/mis-tickets/**").authenticated()
+                        .requestMatchers("/api/upload/**").authenticated() // Permitir subida a todos los logueados
+
+                        // 4. Rutas EXCLUSIVAS de Vendedor
                         .requestMatchers(
                                 "/api/eventos/vendedor/**",
                                 "/api/eventos/crear",
                                 "/api/eventos/{id}/publicar",
                                 "/api/eventos/{id}/ocultar",
-                                "/api/zonas",
-                                "/api/zonas/**", // POST, PUT, DELETE de zonas siguen estrictamente protegidos
-                                "/api/upload/**",
+                                "/api/zonas/**",
                                 "/api/tickets/validar/**"
                         ).hasAnyAuthority("VENDEDOR", "ROLE_VENDEDOR")
 
-                        // 5. API para usuarios autenticados (Clientes comprando o viendo sus tickets)
-                        .requestMatchers("/api/compras/**", "/api/tickets/mis-tickets/**").authenticated()
-
-                        // Todo lo demás requiere autenticación por defecto
+                        // 5. Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
