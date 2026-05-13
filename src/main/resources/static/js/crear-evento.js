@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // 1. Protección de ruta: Solo vendedores pueden entrar aquí
-    if (!Auth.estaAutenticado() || Auth.obtenerRol() !== 'VENDEDOR') {
-        alert("Acceso denegado. Solo los vendedores pueden crear eventos.");
-        window.location.href = 'index.html';
+    if (!Auth.estaAutenticado() || !Auth.obtenerRol().toUpperCase().includes('VENDEDOR')) {
+        showToast("Acceso denegado. Solo los vendedores pueden crear eventos.", "error");
+        setTimeout(() => window.location.href = 'index.html', 1500);
         return;
     }
 
@@ -12,116 +11,105 @@ document.addEventListener('DOMContentLoaded', async () => {
     const errorDiv = document.getElementById('eventoError');
     const btnSubmit = document.getElementById('btnCrear');
 
-    // Botón de cerrar sesión
-    document.getElementById('btnCerrarSesion').addEventListener('click', (e) => {
-        e.preventDefault();
-        Auth.cerrarSesion();
-    });
+    // Aseguramos el ID para el spinner si no existe
+    if (btnSubmit && !btnSubmit.id) btnSubmit.id = 'btnCrear';
 
-    // 2. Cargar categorías desde el backend
-    try {
-        const categorias = await fetchAPI('/eventos/categorias', 'GET');
-        selectCategoria.innerHTML = '<option value="" disabled selected>Selecciona una categoría</option>';
-        categorias.forEach(cat => {
-            selectCategoria.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', (e) => {
+            e.preventDefault();
+            Auth.cerrarSesion();
         });
-    } catch (error) {
-        selectCategoria.innerHTML = '<option value="" disabled>Error al cargar categorías</option>';
     }
 
-    // --- FUNCIÓN AUXILIAR: Subir archivo físico a Spring Boot ---
+    try {
+        const categorias = await fetchAPI('/eventos/categorias', 'GET');
+        if (selectCategoria) {
+            selectCategoria.innerHTML = '<option value="" disabled selected>Selecciona una categoría</option>';
+            categorias.forEach(cat => {
+                selectCategoria.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
+            });
+        }
+    } catch (error) {
+        if (selectCategoria) selectCategoria.innerHTML = '<option value="" disabled>Error al cargar categorías</option>';
+    }
+
     async function subirImagen(file) {
         const formData = new FormData();
         formData.append('file', file);
-
         const token = Auth.obtenerToken();
+        const baseUrl = typeof API_URL !== 'undefined' ? API_URL : window.location.origin + '/api';
 
-        const response = await fetch(`${API_URL}/upload`, {
+        const response = await fetch(`${baseUrl}/upload`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
+            headers: { 'Authorization': `Bearer ${token}` },
             body: formData
         });
 
-        if (!response.ok) {
-            throw new Error(`Fallo al subir la imagen: ${file.name}`);
-        }
-
-        return await response.text();
+        if (!response.ok) throw new Error(`Fallo al subir la imagen: ${file.name}`);
+        const data = await response.json();
+        return data.url;
     }
 
-    // 3. Manejar el envío del formulario
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        errorDiv.style.display = 'none';
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Procesando imágenes, por favor espera...';
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (errorDiv) errorDiv.style.display = 'none';
 
-        const emailVendedor = localStorage.getItem('villaticket_email');
+            toggleSpinner('btnCrear', true);
+            const emailVendedor = Auth.obtenerEmail();
 
-        try {
-            const inputImagenPrincipal = document.getElementById('imagenPrincipal');
-            const inputGaleria = document.getElementById('galeriaImagenes');
+            try {
+                const inputImagenPrincipal = document.getElementById('imagenPrincipal');
+                const inputGaleria = document.getElementById('galeriaImagenes');
 
-            let urlPrincipal = '';
-            let urlsGaleria = [];
+                let urlPrincipal = '';
+                let urlsGaleria = [];
 
-            if (inputImagenPrincipal.files.length > 0) {
-                urlPrincipal = await subirImagen(inputImagenPrincipal.files[0]);
-            } else {
-                throw new Error("Debes subir una imagen principal para el evento.");
-            }
-
-            if (inputGaleria.files.length > 0) {
-                for (let i = 0; i < inputGaleria.files.length; i++) {
-                    const url = await subirImagen(inputGaleria.files[i]);
-                    urlsGaleria.push(url);
+                if (inputImagenPrincipal.files.length > 0) {
+                    urlPrincipal = await subirImagen(inputImagenPrincipal.files[0]);
+                } else {
+                    throw new Error("Debes subir una imagen principal para el evento.");
                 }
+
+                if (inputGaleria && inputGaleria.files.length > 0) {
+                    for (let i = 0; i < inputGaleria.files.length; i++) {
+                        const url = await subirImagen(inputGaleria.files[i]);
+                        urlsGaleria.push(url);
+                    }
+                }
+
+                let horaFormateada = document.getElementById('hora').value;
+                if (horaFormateada.split(':').length === 2) {
+                    horaFormateada += ":00";
+                }
+
+                const data = {
+                    titulo: document.getElementById('titulo').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    fecha: document.getElementById('fecha').value,
+                    hora: horaFormateada,
+                    ubicacion: document.getElementById('ubicacion').value,
+                    categoriaId: document.getElementById('categoriaId').value,
+                    imagen: urlPrincipal,
+                    galeria: urlsGaleria,
+                    vendedorEmail: emailVendedor
+                };
+
+                await fetchAPI('/eventos/crear', 'POST', data);
+
+                showToast("¡Evento y galería guardados con éxito!", "success");
+                setTimeout(() => window.location.href = 'dashboard-vendedor.html', 1500);
+
+            } catch (error) {
+                if (errorDiv) {
+                    errorDiv.textContent = error.message;
+                    errorDiv.style.display = 'block';
+                }
+                showToast(error.message, "error");
+            } finally {
+                toggleSpinner('btnCrear', false);
             }
-
-            let horaFormateada = document.getElementById('hora').value;
-            if (horaFormateada.split(':').length === 2) {
-                horaFormateada += ":00";
-            }
-
-            const data = {
-                titulo: document.getElementById('titulo').value,
-                descripcion: document.getElementById('descripcion').value,
-                fecha: document.getElementById('fecha').value,
-                hora: horaFormateada,
-                ubicacion: document.getElementById('ubicacion').value,
-                categoriaId: document.getElementById('categoriaId').value,
-                imagen: urlPrincipal, // Coincide con CrearEventoRequest
-                galeria: urlsGaleria,
-                vendedorEmail: emailVendedor
-            };
-
-            const token = Auth.obtenerToken();
-            const response = await fetch(`${API_URL}/eventos/crear`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Error al registrar el evento");
-            }
-
-            const eventoCreado = await response.json();
-            alert("¡Evento y galería guardados con éxito!");
-            window.location.href = `gestionar-zonas.html?id=${eventoCreado.id}`;
-
-        } catch (error) {
-            errorDiv.textContent = error.message;
-            errorDiv.style.display = 'block';
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Guardar Evento y Continuar';
-        }
-    });
+        });
+    }
 });

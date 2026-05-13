@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eventoId = urlParams.get('id');
 
     if (!eventoId) {
-        alert("Evento no encontrado.");
+        showToast("Evento no encontrado.", "error");
         window.location.href = 'index.html';
         return;
     }
@@ -163,8 +163,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
 
             if (!Auth.estaAutenticado()) {
-                alert("Debes iniciar sesión para poder comprar entradas.");
-                window.location.href = 'login.html';
+                showToast("Debes iniciar sesión para poder comprar entradas.", "error");
+                setTimeout(() => window.location.href = 'login.html', 1500);
                 return;
             }
 
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const emailCliente = Auth.obtenerEmail();
 
             if (!zonaId || isNaN(cantidad) || cantidad <= 0) {
-                alert("Por favor, selecciona una zona y una cantidad válida (mínimo 1).");
+                showToast("Por favor, selecciona una zona y una cantidad válida (mínimo 1).", "error");
                 return;
             }
 
@@ -183,14 +183,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const documento = document.getElementById(`docAsistente${i}`).value.trim();
 
                 if (!nombre || !documento) {
-                    alert(`Por favor completa el Nombre y Documento del Asistente ${i}`);
+                    showToast(`Por favor completa el Nombre y Documento del Asistente ${i}`, "error");
                     return;
                 }
                 listaAsistentes.push({ nombre: nombre, documento: documento });
             }
 
-            btnComprar.disabled = true;
-            btnComprar.textContent = "Procesando pago...";
+            // Cambiamos el bloqueo manual por el spinner
+            toggleSpinner('btnComprar', true);
 
             try {
                 const requestBody = {
@@ -201,13 +201,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
 
                 const response = await fetchAPI('/compras/procesar', 'POST', requestBody);
-                alert("¡Compra exitosa! Tus entradas han sido generadas.");
-                window.location.href = 'mis-tickets.html';
+                showToast("¡Compra exitosa! Tus entradas han sido generadas.", "success");
+                setTimeout(() => window.location.href = 'mis-tickets.html', 2000);
 
             } catch (error) {
-                alert("Error al comprar: " + error.message);
-                btnComprar.disabled = false;
-                btnComprar.textContent = "Confirmar Compra";
+                showToast("Error al comprar: " + error.message, "error");
+                toggleSpinner('btnComprar', false);
             }
         });
     }

@@ -1,4 +1,3 @@
-// js/auth.js
 const Auth = {
     TOKEN_KEY: 'villaticket_token',
     EMAIL_KEY: 'villaticket_email',
@@ -42,10 +41,26 @@ const Auth = {
             const rolRaw = this.obtenerRol();
             if (rolRaw && linkAdmin) {
                 const rol = rolRaw.toUpperCase();
-                linkAdmin.style.display = rol.includes('VENDEDOR') ? 'block' : 'none';
+
+                // Lógica de menús por Roles
+                if (rol.includes('ADMIN')) {
+                    linkAdmin.style.display = 'block';
+                    linkAdmin.href = 'dashboard-admin.html';
+                    linkAdmin.textContent = 'Panel Súper Admin';
+                    linkAdmin.style.background = '#8b5cf6'; // Color Morado para diferenciar
+                    linkAdmin.style.color = '#ffffff';
+                } else if (rol.includes('VENDEDOR')) {
+                    linkAdmin.style.display = 'block';
+                    linkAdmin.href = 'dashboard-vendedor.html';
+                    linkAdmin.textContent = 'Panel Vendedor';
+                    linkAdmin.style.background = '#60a5fa'; // Color Azul por defecto
+                    linkAdmin.style.color = '#ffffff';
+                } else {
+                    linkAdmin.style.display = 'none';
+                }
             }
 
-            // Cargamos la foto de perfil si existe el elemento en el HTML
+            // Cargar avatar del menú si existe el elemento
             if (imgMenu) {
                 try {
                     const perfil = await fetchAPI('/users/profile', 'GET');
@@ -53,13 +68,15 @@ const Auth = {
                         imgMenu.src = perfil.urlAvatar;
                         imgMenu.style.display = 'block';
                     }
-                } catch (e) { console.warn("No se pudo cargar avatar en menú"); }
+                } catch (e) {
+                    console.warn("No se pudo cargar avatar en menú");
+                }
             }
         }
     }
 };
 
-// --- SOLUCIÓN AL REFERENCE ERROR: Lo hacemos explícitamente global ---
+// Exponer Auth globalmente para que no haya errores de ReferenceError
 window.Auth = Auth;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -68,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menuToggle');
     const navLinks = document.querySelector('.nav-links');
     if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
     }
 });

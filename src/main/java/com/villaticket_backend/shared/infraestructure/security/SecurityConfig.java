@@ -41,12 +41,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/eventos/publicados", "/api/eventos/categorias", "/api/eventos/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/zonas/evento/**").permitAll()
 
-                        // 3. Rutas para CUALQUIER usuario logueado (CLIENTE o VENDEDOR)
-                        // IMPORTANTE: Ponemos esto ANTES de las reglas específicas de Vendedor
+                        // 3. Rutas para usuarios logueados
                         .requestMatchers("/api/users/profile/**").authenticated()
                         .requestMatchers("/api/compras/**").authenticated()
                         .requestMatchers("/api/tickets/mis-tickets/**").authenticated()
-                        .requestMatchers("/api/upload/**").authenticated() // Permitir subida a todos los logueados
+                        .requestMatchers("/api/upload/**").authenticated()
 
                         // 4. Rutas EXCLUSIVAS de Vendedor
                         .requestMatchers(
@@ -58,7 +57,10 @@ public class SecurityConfig {
                                 "/api/tickets/validar/**"
                         ).hasAnyAuthority("VENDEDOR", "ROLE_VENDEDOR")
 
-                        // 5. Cualquier otra petición requiere autenticación
+                        // 5. Rutas EXCLUSIVAS de Súper Admin (Corregido para coincidir con tu BD)
+                        .requestMatchers("/api/admin/**").hasAnyAuthority("SUPER_ADMIN", "ROLE_SUPER_ADMIN")
+
+                        // 6. Cualquier otra petición requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

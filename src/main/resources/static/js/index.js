@@ -9,14 +9,20 @@ let textoBusqueda = '';
 document.addEventListener('DOMContentLoaded', async () => {
     const contenedorEventos = document.getElementById('eventosGrid');
     const searchInput = document.getElementById('searchInput');
-    const chipsCategorias = document.querySelectorAll('.chip'); // Cambiado de .cat-btn a .chip
+    const chipsCategorias = document.querySelectorAll('.chip');
 
     if (!contenedorEventos) return;
 
-    // 1. CARGA INICIAL
+    // 1. CARGA INICIAL (Conectado a la paginación del Backend)
     try {
         contenedorEventos.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Cargando cartelera...</p>';
-        todosLosEventos = await fetchAPI('/eventos/publicados', 'GET');
+
+        // Obtenemos los primeros 50 eventos
+        const responseData = await fetchAPI('/eventos/publicados?page=0&size=50', 'GET');
+
+        // Compatibilidad: Si Spring envía un "Page", los datos están en .content
+        todosLosEventos = responseData.content ? responseData.content : responseData;
+
         filtrarYMostrar();
     } catch (error) {
         console.error("Error al cargar la cartelera:", error);
@@ -74,11 +80,16 @@ function filtrarYMostrar() {
         const ubicacion = evento.ubicacion || 'Ubicación por definir';
         const categoria = evento.categoriaNombre || 'General';
 
+        // --- CORRECCIÓN DE RUTAS DE IMAGEN PARA EVITAR ERRORES DE PLACEHOLDER ---
         let imagenSrc = evento.imagenUrl || evento.imagen;
+        if (imagenSrc && imagenSrc.startsWith('/')) {
+            imagenSrc = window.location.origin + imagenSrc;
+        }
         if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
-            imagenSrc = 'https://via.placeholder.com/400x250?text=Villaticket';
+            imagenSrc = 'css/img/no-image.png'; // Usamos una imagen local u omitimos
         }
 
+        // Evaluar caducidad
         let estaCaducado = false;
         if (fecha && fecha !== 'Fecha por definir') {
             const partes = fecha.split('-');
@@ -92,20 +103,25 @@ function filtrarYMostrar() {
         let botonTexto = estaCaducado ? 'Ver Detalles (Finalizado)' : 'Ver Detalles';
         let botonClase = estaCaducado ? 'btn-secondary' : 'btn-primary';
 
+        // Construir la tarjeta del evento
         contenedorEventos.innerHTML += `
-            <article class="card-evento">
-                <img src="${imagenSrc}" alt="${titulo}" class="card-img" style="height: 200px; object-fit: cover;" onerror="this.src='https://via.placeholder.com/400x250?text=Error'">
-                <div class="card-body">
-                    <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                        <span class="card-category">${categoria}</span>
-                        ${badgeEstado}
+            <article class="card-evento" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="height: 200px; background: #333; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="${imagenSrc}" alt="${titulo}" class="card-img" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
-                    <h3 class="card-title">${titulo}</h3>
-                    <p class="card-info">📅 ${fecha}</p>
-                    <p class="card-info">📍 ${ubicacion}</p>
-                    <div class="card-footer" style="margin-top: 15px;">
-                        <a href="detalle-evento.html?id=${id}" class="${botonClase}" style="display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 5px;">${botonTexto}</a>
+                    <div class="card-body">
+                        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                            <span class="card-category">${categoria}</span>
+                            ${badgeEstado}
+                        </div>
+                        <h3 class="card-title">${titulo}</h3>
+                        <p class="card-info">📅 ${fecha}</p>
+                        <p class="card-info">📍 ${ubicacion}</p>
                     </div>
+                </div>
+                <div class="card-footer" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto;">
+                    <a href="detalle-evento.html?id=${id}" class="${botonClase}" style="display: block; text-align: center; text-decoration: none; padding: 10px; border-radius: 5px;">${botonTexto}</a>
                 </div>
             </article>
         `;

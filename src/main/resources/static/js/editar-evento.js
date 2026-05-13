@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
-    if (!Auth.estaAutenticado() || Auth.obtenerRol() !== 'VENDEDOR') {
+    if (!Auth.estaAutenticado() || !Auth.obtenerRol().toUpperCase().includes('VENDEDOR')) {
         window.location.href = 'index.html';
         return;
     }
@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const eventoId = urlParams.get('id');
 
     if (!eventoId) {
-        alert("Error: Evento no válido.");
-        window.location.href = 'dashboard-vendedor.html';
+        showToast("Error: Evento no válido.", "error");
+        setTimeout(() => window.location.href = 'dashboard-vendedor.html', 1500);
         return;
     }
 
@@ -18,13 +18,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const form = document.getElementById('editarEventoForm');
     const btnSubmit = document.getElementById('btnActualizar');
 
-    // 1. Cargar categorías y datos actuales del evento
+    if (btnSubmit && !btnSubmit.id) btnSubmit.id = 'btnActualizar';
+
     try {
         const categorias = await fetchAPI('/eventos/categorias', 'GET');
-        selectCategoria.innerHTML = '';
-        categorias.forEach(cat => {
-            selectCategoria.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
-        });
+        if (selectCategoria) {
+            selectCategoria.innerHTML = '';
+            categorias.forEach(cat => {
+                selectCategoria.innerHTML += `<option value="${cat.id}">${cat.nombre}</option>`;
+            });
+        }
 
         const evento = await fetchAPI(`/eventos/${eventoId}`, 'GET');
 
@@ -32,82 +35,77 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('descripcion').value = evento.descripcion || "";
         document.getElementById('fecha').value = evento.fecha || "";
 
-        // Formatear hora de HH:mm:ss a HH:mm para el input tipo time
         if (evento.hora) {
             document.getElementById('hora').value = evento.hora.substring(0, 5);
         }
 
         document.getElementById('ubicacion').value = evento.ubicacion || "";
 
-        // Pre-seleccionar la categoría correcta
-        if (evento.categoriaNombre) {
+        if (evento.categoriaNombre && selectCategoria) {
             Array.from(selectCategoria.options).forEach(opt => {
-                if (opt.text === evento.categoriaNombre) {
-                    opt.selected = true;
-                }
+                if (opt.text === evento.categoriaNombre) opt.selected = true;
             });
         }
 
     } catch (error) {
-        console.error("Error al cargar datos:", error);
-        alert("No se pudo cargar la información del evento.");
+        showToast("No se pudo cargar la información del evento.", "error");
     }
 
-    // Función auxiliar para subir imagen
     async function subirImagen(file) {
         const formData = new FormData();
         formData.append('file', file);
         const token = Auth.obtenerToken();
-        const response = await fetch(`${API_URL}/upload`, {
+        const baseUrl = typeof API_URL !== 'undefined' ? API_URL : window.location.origin + '/api';
+
+        const response = await fetch(`${baseUrl}/upload`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` },
             body: formData
         });
+
         if (!response.ok) throw new Error(`Fallo al subir la imagen`);
-        return await response.text();
+        const data = await response.json();
+        return data.url;
     }
 
-    // 3. Enviar actualización
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Actualizando...';
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            toggleSpinner('btnActualizar', true);
 
-        try {
-            const inputImagen = document.getElementById('imagenPrincipal');
-            let nuevaUrlImagen = ""; // Inicializar vacío
+            try {
+                const inputImagen = document.getElementById('imagenPrincipal');
+                let nuevaUrlImagen = "";
 
-            if (inputImagen.files.length > 0) {
-                nuevaUrlImagen = await subirImagen(inputImagen.files[0]);
+                if (inputImagen.files.length > 0) {
+                    nuevaUrlImagen = await subirImagen(inputImagen.files[0]);
+                }
+
+                let horaInput = document.getElementById('hora').value;
+                if (horaInput.split(':').length === 2) {
+                    horaInput += ":00";
+                }
+
+                const datosActualizados = {
+                    titulo: document.getElementById('titulo').value,
+                    descripcion: document.getElementById('descripcion').value,
+                    fecha: document.getElementById('fecha').value,
+                    hora: horaInput,
+                    ubicacion: document.getElementById('ubicacion').value,
+                    categoriaId: parseInt(selectCategoria.value),
+                    imagen: nuevaUrlImagen
+                };
+
+                await fetchAPI(`/eventos/${eventoId}`, 'PUT', datosActualizados);
+
+                showToast("¡Evento actualizado correctamente!", "success");
+                setTimeout(() => window.location.href = 'dashboard-vendedor.html', 1500);
+
+            } catch (error) {
+                showToast(`Error al actualizar: ${error.message}`, "error");
+            } finally {
+                toggleSpinner('btnActualizar', false);
             }
-
-            let horaInput = document.getElementById('hora').value;
-            if (horaInput.split(':').length === 2) {
-                horaInput += ":00";
-            }
-
-            const datosActualizados = {
-                titulo: document.getElementById('titulo').value,
-                descripcion: document.getElementById('descripcion').value,
-                fecha: document.getElementById('fecha').value,
-                hora: horaInput,
-                ubicacion: document.getElementById('ubicacion').value,
-                categoriaId: parseInt(selectCategoria.value),
-                imagen: nuevaUrlImagen // Se envía al Backend
-            };
-
-            // Llamada al endpoint PUT
-            await fetchAPI(`/eventos/${eventoId}`, 'PUT', datosActualizados);
-
-            alert("¡Evento actualizado correctamente!");
-            window.location.href = 'dashboard-vendedor.html';
-
-        } catch (error) {
-            console.error("Error en la actualización:", error);
-            alert(`Error al actualizar: ${error.message}`);
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Actualizar Evento';
-        }
-    });
+        });
+    }
 });

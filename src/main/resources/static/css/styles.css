@@ -888,3 +888,62 @@ body {
     border-color: #ff4757;
     box-shadow: 0 0 8px rgba(255, 71, 87, 0.2);
 }
+
+/* =========================================
+   TOAST NOTIFICATIONS (MENSAJES FLOTANTES)
+   ========================================= */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.toast {
+    min-width: 250px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 500;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    opacity: 0;
+    transform: translateX(100%);
+    animation: slideInRight 0.4s forwards;
+    display: flex;
+    align-items: center;
+    font-size: 0.95rem;
+}
+.toast.success { background-color: #4ade80; color: #14532d; border-left: 5px solid #166534; }
+.toast.error { background-color: #ff4757; color: #fff; border-left: 5px solid #991b1b; }
+.toast.info { background-color: #60a5fa; color: #fff; border-left: 5px solid #1e3a8a; }
+
+@keyframes slideInRight {
+    to { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeOutRight {
+    to { opacity: 0; transform: translateX(100%); }
+}
+
+/* =========================================
+   SPINNER DE CARGA
+   ========================================= */
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}

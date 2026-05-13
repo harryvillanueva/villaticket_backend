@@ -1,5 +1,5 @@
-// Variable global para almacenar el gráfico
 let graficoIngresos = null;
+let saldoActualDisponible = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     if (!Auth.estaAutenticado() || !Auth.obtenerRol().toUpperCase().includes('VENDEDOR')) {
@@ -7,8 +7,68 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     cargarDashboard();
+    cargarMonedero();
 });
 
+// --- 1. LÓGICA DEL MONEDERO ---
+async function cargarMonedero() {
+    try {
+        const finanzas = await fetchAPI('/eventos/vendedor/finanzas/saldo', 'GET');
+        saldoActualDisponible = finanzas.saldoDisponible;
+        document.getElementById('saldoDisponible').textContent = `${finanzas.saldoDisponible.toFixed(2)} €`;
+        document.getElementById('saldoRetirado').textContent = `${finanzas.retirado.toFixed(2)} €`;
+
+        const historial = await fetchAPI('/eventos/vendedor/finanzas/historial', 'GET');
+        const tabla = document.getElementById('tablaRetirosVendedor');
+        tabla.innerHTML = '';
+
+        if (historial.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="4" style="text-align:center;">No has realizado retiros aún.</td></tr>';
+            return;
+        }
+
+        historial.forEach(r => {
+            let color = r.estado === 'APROBADO' ? '#4ade80' : (r.estado === 'RECHAZADO' ? '#ff4757' : '#fbbf24');
+            let fechaFmt = r.fechaSolicitud ? r.fechaSolicitud.substring(0, 10) : 'N/A';
+            tabla.innerHTML += `
+                <tr>
+                    <td>#${r.id}</td>
+                    <td>${fechaFmt}</td>
+                    <td style="font-weight:bold;">${r.monto.toFixed(2)} €</td>
+                    <td style="color:${color}; font-weight:bold;">${r.estado}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        console.error("Error al cargar monedero:", e);
+    }
+}
+
+async function solicitarRetiro() {
+    if (saldoActualDisponible <= 0) {
+        showToast("No tienes saldo disponible para retirar.", "error");
+        return;
+    }
+
+    const montoStr = prompt(`Tienes ${saldoActualDisponible.toFixed(2)} € disponibles.\n¿Cuánto deseas retirar a tu cuenta IBAN?`, saldoActualDisponible.toFixed(2));
+    if (!montoStr) return;
+
+    const monto = parseFloat(montoStr);
+    if (isNaN(monto) || monto <= 0 || monto > saldoActualDisponible) {
+        showToast("Monto inválido. Asegúrate de no exceder tu saldo disponible.", "error");
+        return;
+    }
+
+    try {
+        await fetchAPI('/eventos/vendedor/finanzas/solicitar', 'POST', { monto: monto });
+        showToast("Solicitud de retiro enviada con éxito. El administrador la revisará pronto.", "success");
+        cargarMonedero(); // Refrescamos las cifras
+    } catch (error) {
+        showToast(error.message || "Error al solicitar el retiro. ¿Tienes configurado tu IBAN en el perfil?", "error");
+    }
+}
+
+// --- 2. LÓGICA DE EVENTOS Y ESTADÍSTICAS ---
 async function cargarDashboard() {
     const contenedorEventos = document.getElementById('eventosGrid');
     const emailVendedor = Auth.obtenerEmail();
@@ -16,7 +76,6 @@ async function cargarDashboard() {
 
     try {
         const eventos = await fetchAPI(`/eventos/vendedor/${emailVendedor}`, 'GET');
-
         contenedorEventos.innerHTML = '';
 
         if (!eventos || eventos.length === 0) {
@@ -38,10 +97,8 @@ async function cargarDashboard() {
 
             try {
                 const zonas = await fetchAPI(`/zonas/evento/${evento.id}`, 'GET');
-
                 if (zonas && zonas.length > 0) {
                     htmlZonasStats = '<div class="zonas-stats"><h4 style="color:#fff; font-size:0.9rem; margin-bottom:10px;">Estado del Aforo:</h4>';
-
                     for (const zona of zonas) {
                         const capacidad = zona.capacidadTotal || 0;
                         const disponibles = zona.capacidadActual !== undefined ? zona.capacidadActual : capacidad;
@@ -71,7 +128,7 @@ async function cargarDashboard() {
                     htmlZonasStats += '</div>';
                 }
             } catch (err) {
-                console.warn(`No se pudieron cargar las zonas para el evento ${evento.id}`, err);
+                console.warn(`Zonas no cargadas para evento ${evento.id}`);
             }
 
             totalTicketsVendidosGlobal += ticketsVendidosEvento;
@@ -84,18 +141,12 @@ async function cargarDashboard() {
             const fecha = evento.fecha || 'Fecha por definir';
             const estado = evento.estado || 'BORRADOR';
 
-            // --- CORRECCIÓN DE IMAGEN ---
-            // Revisamos tanto imagenUrl como imagen (nombres comunes en tu DTO)
             let imagenSrc = evento.imagenUrl || evento.imagen;
-
-            // Si la ruta es relativa (ej: /uploads/...), le ponemos el origen del servidor
             if (imagenSrc && imagenSrc.startsWith('/')) {
                 imagenSrc = window.location.origin + imagenSrc;
             }
-
-            // Si no hay imagen, usamos un placeholder que no dependa de servicios externos que fallan
             if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
-                imagenSrc = 'css/img/no-image.png'; // Asegúrate de tener una imagen local o usa un div de color
+                imagenSrc = 'css/img/no-image.png'; // Evitamos el bucle del placeholder
             }
 
             let estaCaducado = false;
@@ -105,9 +156,7 @@ async function cargarDashboard() {
                     const fechaEventoLocal = new Date(partes[0], partes[1] - 1, partes[2]);
                     const hoy = new Date();
                     hoy.setHours(0, 0, 0, 0);
-                    if (fechaEventoLocal < hoy) {
-                        estaCaducado = true;
-                    }
+                    if (fechaEventoLocal < hoy) estaCaducado = true;
                 }
             }
 
@@ -117,14 +166,16 @@ async function cargarDashboard() {
             if (estaCaducado) {
                 badgeEstado = '<span style="background: #3f3f46; color: #a1a1aa; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">CADUCADO</span>';
                 if (estado === 'PUBLICADO') {
-                    botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;">Ocultar</button>`;
+                    botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer;">Ocultar</button>`;
                 }
             } else if (estado === 'PUBLICADO') {
                 badgeEstado = '<span style="background: #4ade80; color: #14532d; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">PUBLICADO</span>';
-                botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;">Ocultar</button>`;
+                botonAccion = `<button onclick="ocultarEvento(${id})" style="flex: 1; padding: 8px; border-radius: 5px; background-color: #fca5a5; color: #7f1d1d; border: none; font-weight: bold; cursor: pointer;">Ocultar</button>`;
+            } else if (estado === 'CANCELADO') {
+                badgeEstado = '<span style="background: #ff4757; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">CANCELADO POR ADMIN</span>';
             } else {
                 badgeEstado = '<span style="background: #fbbf24; color: #78350f; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">BORRADOR</span>';
-                botonAccion = `<button onclick="publicarEvento(${id})" style="flex: 1; text-align: center; padding: 8px; border-radius: 5px; background-color: #4ade80; color: #14532d; border: none; font-weight: bold; cursor: pointer; min-width: 80px; transition: opacity 0.2s;">Publicar</button>`;
+                botonAccion = `<button onclick="publicarEvento(${id})" style="flex: 1; padding: 8px; border-radius: 5px; background-color: #4ade80; color: #14532d; border: none; font-weight: bold; cursor: pointer;">Publicar</button>`;
             }
 
             contenedorEventos.innerHTML += `
@@ -143,10 +194,9 @@ async function cargarDashboard() {
                             ${htmlZonasStats}
                         </div>
                     </div>
-
                     <div class="card-footer" style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 10px; flex-wrap: wrap;">
-                        <a href="editar-evento.html?id=${id}" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px; min-width: 80px;">Editar</a>
-                        <a href="gestionar-zonas.html?id=${id}" class="btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px; min-width: 80px;">Zonas</a>
+                        <a href="editar-evento.html?id=${id}" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px;">Editar</a>
+                        <a href="gestionar-zonas.html?id=${id}" class="btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px; border-radius: 5px;">Zonas</a>
                         ${botonAccion}
                     </div>
                 </article>
@@ -155,7 +205,7 @@ async function cargarDashboard() {
 
         actualizarEstadisticas(totalTicketsVendidosGlobal, totalIngresosGlobal, eventos.length);
 
-        if(chartSection) {
+        if(chartSection && nombresDeEventos.length > 0) {
             chartSection.style.display = 'block';
             dibujarGrafico(nombresDeEventos, ingresosPorEvento);
         }
@@ -177,17 +227,14 @@ function dibujarGrafico(etiquetas, datos) {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-
-    if (graficoIngresos) {
-        graficoIngresos.destroy();
-    }
+    if (graficoIngresos) graficoIngresos.destroy();
 
     graficoIngresos = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: etiquetas,
             datasets: [{
-                label: 'Ingresos Estimados (€)',
+                label: 'Ingresos Brutos (€)',
                 data: datos,
                 backgroundColor: 'rgba(74, 222, 128, 0.7)',
                 borderColor: '#4ade80',
@@ -211,20 +258,16 @@ async function publicarEvento(idEvento) {
     if (!confirm("¿Estás seguro de que deseas publicar este evento?")) return;
     try {
         await fetchAPI(`/eventos/${idEvento}/publicar`, 'PUT');
-        alert("¡Evento publicado con éxito!");
+        showToast("¡Evento publicado con éxito!", "success");
         cargarDashboard();
-    } catch (error) {
-        alert("Hubo un error: " + error.message);
-    }
+    } catch (error) { showToast("Hubo un error: " + error.message, "error"); }
 }
 
 async function ocultarEvento(idEvento) {
     if (!confirm("¿Deseas ocultar este evento?")) return;
     try {
         await fetchAPI(`/eventos/${idEvento}/ocultar`, 'PUT');
-        alert("El evento ha sido ocultado exitosamente.");
+        showToast("El evento ha sido ocultado exitosamente.", "success");
         cargarDashboard();
-    } catch (error) {
-        alert("Hubo un error: " + error.message);
-    }
+    } catch (error) { showToast("Hubo un error: " + error.message, "error"); }
 }

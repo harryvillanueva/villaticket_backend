@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
 
     if (!loginForm) return;
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (loginError) loginError.textContent = '';
+
+        toggleSpinner('btnLogin', true);
 
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
-        const btnSubmit = document.getElementById('btnLogin');
-
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = "Verificando...";
 
         try {
             const baseUrl = window.location.origin + '/api';
@@ -26,35 +26,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 localStorage.clear();
 
-                // Usamos window.Auth para asegurar que lo encuentre
                 const authManager = window.Auth;
-
                 const rolDetectado = data.role || data.rol || "CLIENTE";
 
                 localStorage.setItem(authManager.TOKEN_KEY, data.token);
                 localStorage.setItem(authManager.EMAIL_KEY, data.email);
                 localStorage.setItem(authManager.ROLE_KEY, rolDetectado);
 
-                console.log("Login exitoso. Redirigiendo...");
+                showToast("¡Sesión iniciada correctamente!", "success");
 
                 setTimeout(() => {
-                    if (rolDetectado.toUpperCase().includes('VENDEDOR')) {
+                    if (rolDetectado.toUpperCase().includes('ADMIN')) {
+                        window.location.href = 'dashboard-admin.html';
+                    } else if (rolDetectado.toUpperCase().includes('VENDEDOR')) {
                         window.location.href = 'dashboard-vendedor.html';
                     } else {
                         window.location.href = 'index.html';
                     }
-                }, 100);
+                }, 1500);
 
             } else {
-                alert(data.error || "Credenciales incorrectas.");
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = "Iniciar sesión";
+                showToast(data.error || "Credenciales incorrectas.", "error");
+                if (loginError) loginError.textContent = data.error || "Credenciales incorrectas.";
+                toggleSpinner('btnLogin', false);
             }
         } catch (error) {
-            console.error("Error en login:", error);
-            alert("Error de conexión con el servidor.");
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = "Iniciar sesión";
+            showToast("Error de conexión con el servidor.", "error");
+            toggleSpinner('btnLogin', false);
         }
     });
 });

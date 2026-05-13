@@ -1,40 +1,38 @@
-// js/registro.js
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('registroForm');
-    const errorDiv = document.getElementById('registroError');
-    const btnSubmit = document.getElementById('btnRegistro');
+    const registroForm = document.getElementById('registroForm');
+    const registroError = document.getElementById('registroError');
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita que la página recargue
+    if (registroForm) {
+        registroForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (registroError) registroError.textContent = '';
 
-        // Limpiar errores previos
-        errorDiv.style.display = 'none';
-        btnSubmit.disabled = true;
-        btnSubmit.textContent = 'Registrando...';
+            toggleSpinner('btnRegistro', true);
 
-        // Capturar datos
-        const data = {
-            nombre: document.getElementById('nombre').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            rol: document.getElementById('rol').value
-        };
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const rol = document.getElementById('rol').value;
 
-        try {
-            // Llamamos al backend usando nuestro api.js
-            // Asegúrate de que este endpoint coincida con tu @PostMapping en Spring Boot
-            await fetchAPI('/users/register', 'POST', data);
+            try {
+                await fetchAPI('/users/register', 'POST', {
+                    nombre,
+                    email,
+                    password,
+                    rol
+                });
 
-            // Si el registro es exitoso, lo mandamos al login
-            alert('¡Cuenta creada con éxito! Por favor, inicia sesión.');
-            window.location.href = 'login.html';
+                showToast("¡Cuenta creada! Redirigiendo al login...", "success");
 
-        } catch (error) {
-            errorDiv.textContent = error.message || 'Ocurrió un error al registrar el usuario.';
-            errorDiv.style.display = 'block';
-        } finally {
-            btnSubmit.disabled = false;
-            btnSubmit.textContent = 'Registrarse';
-        }
-    });
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+
+            } catch (error) {
+                showToast(error.message, "error");
+                if (registroError) registroError.textContent = error.message;
+                toggleSpinner('btnRegistro', false);
+            }
+        });
+    }
 });

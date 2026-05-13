@@ -1,134 +1,146 @@
 document.addEventListener('DOMContentLoaded', async () => {
-
-    if (!Auth.estaAutenticado() || Auth.obtenerRol() !== 'VENDEDOR') {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    document.getElementById('btnCerrarSesion').addEventListener('click', (e) => {
-        e.preventDefault();
-        Auth.cerrarSesion();
-    });
-
     const urlParams = new URLSearchParams(window.location.search);
     const eventoId = urlParams.get('id');
 
-    if (!eventoId || eventoId === 'undefined' || eventoId === 'null') {
-        alert("Error: No se ha especificado un evento válido.");
+    if (!eventoId) {
+        showToast("No se encontró el ID del evento", "error");
         window.location.href = 'dashboard-vendedor.html';
         return;
     }
 
     const formCrearZona = document.getElementById('formCrearZona');
     const tbodyZonas = document.getElementById('tbodyZonas');
-    const btnSubmit = document.getElementById('btnSubmitZona');
     const tituloFormulario = document.getElementById('tituloFormulario');
+    const btnSubmitZona = document.getElementById('btnSubmitZona');
 
-    let editandoZonaId = null; // Si tiene un ID, estamos editando. Si es null, estamos creando.
+    let modoEdicion = false;
+    let zonaIdEdicion = null;
 
+    // --- 1. CONFIGURACIÓN INICIAL (Cerrar Sesión) ---
+    const btnCerrarSesion = document.getElementById('btnCerrarSesion');
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', (e) => {
+            e.preventDefault();
+            Auth.cerrarSesion();
+        });
+    }
+
+    // --- 2. CARGAR NOMBRE DEL EVENTO ---
+    try {
+        const evento = await fetchAPI(`/eventos/${eventoId}`, 'GET');
+        const subtitulo = document.querySelector('.auth-subtitle');
+        if (subtitulo) {
+            subtitulo.innerHTML = `Gestionando zonas para: <strong>${evento.titulo}</strong>`;
+        }
+    } catch (error) {
+        console.error("Error al obtener nombre del evento:", error);
+    }
+
+    // --- 3. CARGAR LISTADO DE ZONAS ---
     async function cargarZonas() {
         try {
             const zonas = await fetchAPI(`/zonas/evento/${eventoId}`, 'GET');
             tbodyZonas.innerHTML = '';
 
-            if (!zonas || zonas.length === 0) {
-                tbodyZonas.innerHTML = `<tr><td colspan="4" style="padding: 15px; text-align: center; color: #888;">No hay zonas creadas.</td></tr>`;
+            if (zonas.length === 0) {
+                tbodyZonas.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 20px; color: #888;">No hay zonas configuradas para este evento.</td></tr>';
                 return;
             }
 
             zonas.forEach(zona => {
-                const nombre = zona.nombre || 'Sin nombre';
-                const capacidad = zona.capacidadTotal || 0;
-                const precio = zona.precio ? zona.precio.toFixed(2) : '0.00';
-
-                tbodyZonas.innerHTML += `
-                    <tr style="border-bottom: 1px solid #333;">
-                        <td style="padding: 10px;">${nombre}</td>
-                        <td style="padding: 10px;">${capacidad}</td>
-                        <td style="padding: 10px;">${precio} €</td>
-                        <td style="padding: 10px;">
-                            <button style="background: transparent; border: 1px solid #555; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-right: 5px;"
-                                    onclick="prepararEdicion(${zona.id}, '${nombre}', ${capacidad}, ${zona.precio})">
-                                ✏️ Editar
-                            </button>
-                            <button style="background: #ff4757; border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;"
-                                    onclick="eliminarZona(${zona.id})">
-                                🗑️ Eliminar
-                            </button>
-                        </td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid #333';
+                tr.innerHTML = `
+                    <td style="padding: 12px;">${zona.nombre}</td>
+                    <td style="padding: 12px;">${zona.capacidadTotal}</td>
+                    <td style="padding: 12px;">${zona.precio.toFixed(2)} €</td>
+                    <td style="padding: 12px; display: flex; gap: 10px;">
+                        <button class="btn-edit" onclick="prepararEdicion(${zona.id}, '${zona.nombre}', ${zona.capacidadTotal}, ${zona.precio})"
+                                style="background: #fbbf24; color: #000; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                            Editar
+                        </button>
+                        <button class="btn-delete" onclick="eliminarZona(${zona.id})"
+                                style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                            Eliminar
+                        </button>
+                    </td>
                 `;
+                tbodyZonas.appendChild(tr);
             });
         } catch (error) {
-            tbodyZonas.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff4757;">Error al cargar las zonas.</td></tr>`;
+            showToast("Error al cargar las zonas.", "error");
         }
     }
 
-    // Manejo del envío del formulario (Crear o Actualizar)
-    if (formCrearZona) {
-        formCrearZona.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            btnSubmit.disabled = true;
-            btnSubmit.textContent = 'Guardando...';
+    // --- 4. PREPARAR EDICIÓN ---
+    window.prepararEdicion = (id, nombre, capacidad, precio) => {
+        modoEdicion = true;
+        zonaIdEdicion = id;
+        tituloFormulario.textContent = "Editar Zona";
+        btnSubmitZona.textContent = "Actualizar Zona";
 
-            const datosZona = {
-                eventoId: parseInt(eventoId),
-                nombre: document.getElementById('nombreZona').value,
-                capacidadTotal: parseInt(document.getElementById('capacidadZona').value),
-                precio: parseFloat(document.getElementById('precioZona').value)
-            };
-
-            try {
-                if (editandoZonaId) {
-                    // PUT para Actualizar
-                    await fetchAPI(`/zonas/${editandoZonaId}`, 'PUT', datosZona);
-                    alert('Zona actualizada con éxito.');
-                } else {
-                    // POST para Crear
-                    await fetchAPI('/zonas', 'POST', datosZona);
-                    alert('Zona creada con éxito.');
-                }
-
-                // Limpiar formulario y restaurar modo "Crear"
-                formCrearZona.reset();
-                editandoZonaId = null;
-                tituloFormulario.textContent = 'Añadir Nueva Zona';
-                btnSubmit.textContent = 'Añadir Zona';
-
-                await cargarZonas();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            } finally {
-                btnSubmit.disabled = false;
-            }
-        });
-    }
-
-    // Función para subir los datos de la tabla al formulario
-    window.prepararEdicion = function(id, nombre, capacidad, precio) {
         document.getElementById('nombreZona').value = nombre;
         document.getElementById('capacidadZona').value = capacidad;
         document.getElementById('precioZona').value = precio;
 
-        editandoZonaId = id; // Entramos en modo edición
-        tituloFormulario.textContent = 'Editar Zona';
-        btnSubmit.textContent = 'Actualizar Zona';
-
-        // Hacemos scroll hacia arriba para que el usuario vea el formulario
-        document.getElementById('nombreZona').focus();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Hacer scroll suave hacia el formulario
+        document.querySelector('.auth-card').scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Función para eliminar zona
-    window.eliminarZona = async function(idZona) {
-        if (!confirm('¿Estás seguro de que deseas eliminar esta zona?')) return;
+    // --- 5. CREAR O EDITAR (SUBMIT) ---
+    formCrearZona.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        toggleSpinner('btnSubmitZona', true);
+
+        const datos = {
+            eventoId: parseInt(eventoId),
+            nombre: document.getElementById('nombreZona').value,
+            capacidadTotal: parseInt(document.getElementById('capacidadZona').value),
+            precio: parseFloat(document.getElementById('precioZona').value)
+        };
+
         try {
-            await fetchAPI(`/zonas/${idZona}`, 'DELETE');
-            await cargarZonas();
+            if (modoEdicion) {
+                await fetchAPI(`/zonas/${zonaIdEdicion}`, 'PUT', {
+                    nombre: datos.nombre,
+                    capacidadTotal: datos.capacidadTotal,
+                    precio: datos.precio
+                });
+                showToast("Zona actualizada correctamente.", "success");
+            } else {
+                await fetchAPI('/zonas', 'POST', datos);
+                showToast("Nueva zona añadida.", "success");
+            }
+
+            // Resetear Formulario
+            formCrearZona.reset();
+            modoEdicion = false;
+            zonaIdEdicion = null;
+            tituloFormulario.textContent = "Añadir Nueva Zona";
+            btnSubmitZona.textContent = "Añadir Zona";
+
+            cargarZonas();
         } catch (error) {
-            alert(`Error al eliminar: ${error.message}`);
+            showToast(error.message, "error");
+        } finally {
+            toggleSpinner('btnSubmitZona', false);
+        }
+    });
+
+    // --- 6. ELIMINAR ZONA ---
+    window.eliminarZona = async (id) => {
+        if (!confirm("¿Estás seguro de que deseas eliminar esta zona?")) return;
+
+        try {
+            await fetchAPI(`/zonas/${id}`, 'DELETE');
+            showToast("Zona eliminada.", "info");
+            cargarZonas();
+        } catch (error) {
+            showToast("No se pudo eliminar la zona.", "error");
         }
     };
 
-    await cargarZonas();
+    // Inicialización
+    cargarZonas();
 });

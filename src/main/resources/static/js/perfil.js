@@ -10,9 +10,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputIban = document.getElementById('perfilIban');
     const userAvatarMenu = document.getElementById('userAvatarMenu');
 
+    // Asignación de IDs dinámicos para los botones de envío si no los tienen
+    const btnPerfil = document.querySelector('#perfilForm button[type="submit"]');
+    if (btnPerfil && !btnPerfil.id) btnPerfil.id = 'btnGuardarPerfil';
+
+    const btnPass = document.querySelector('#passwordForm button[type="submit"]');
+    if (btnPass && !btnPass.id) btnPass.id = 'btnCambiarPass';
+
     let currentUrlAvatar = '';
 
-    // 1. Cargar Datos del Perfil
     try {
         const perfil = await fetchAPI('/users/profile', 'GET');
 
@@ -32,10 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             seccionIban.style.display = 'none';
         }
     } catch (error) {
-        console.error("Error al cargar perfil:", error);
+        showToast("Error al cargar datos del perfil", "error");
     }
 
-    // 2. Subida de Foto
     avatarInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -45,12 +50,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const token = Auth.obtenerToken();
-            // IMPORTANTE: No ponemos 'Content-Type' manual, el navegador lo hace por el FormData
             const response = await fetch('/api/upload', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
                 body: formData
             });
 
@@ -62,17 +64,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
             currentUrlAvatar = data.url;
             avatarPreview.src = data.url;
-            alert("Previsualización cargada. Haz clic en 'Actualizar Mis Datos' para guardar.");
+            showToast("Previsualización cargada. Haz clic en 'Actualizar' para guardar.", "info");
 
         } catch (error) {
-            console.error("Error en upload:", error);
-            alert("Error: " + error.message);
+            showToast("Error al procesar la imagen", "error");
         }
     });
 
-    // 3. Guardar Cambios
     document.getElementById('perfilForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        toggleSpinner('btnGuardarPerfil', true);
+
         const request = {
             nombre: document.getElementById('perfilNombre').value,
             urlAvatar: currentUrlAvatar,
@@ -81,32 +83,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             await fetchAPI('/users/profile', 'PUT', request);
-            alert("¡Perfil actualizado con éxito!");
+            showToast("¡Perfil actualizado con éxito!", "success");
 
-            // Actualizar la foto del menú inmediatamente
             if (userAvatarMenu && currentUrlAvatar) {
                 userAvatarMenu.src = currentUrlAvatar;
                 userAvatarMenu.style.display = 'block';
             }
-
         } catch (error) {
-            alert("Error al actualizar: " + error.message);
+            showToast(error.message, "error");
+        } finally {
+            toggleSpinner('btnGuardarPerfil', false);
         }
     });
 
-    // 4. Cambiar Contraseña
     document.getElementById('passwordForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        toggleSpinner('btnCambiarPass', true);
+
         const request = {
             passwordActual: document.getElementById('passActual').value,
             passwordNueva: document.getElementById('passNueva').value
         };
         try {
             await fetchAPI('/users/profile/password', 'PUT', request);
-            alert("Contraseña actualizada. Inicia sesión de nuevo.");
-            Auth.cerrarSesion();
+            showToast("Contraseña actualizada. Inicia sesión de nuevo.", "success");
+            setTimeout(() => Auth.cerrarSesion(), 2000);
         } catch (error) {
-            alert(error.message);
+            showToast(error.message, "error");
+        } finally {
+            toggleSpinner('btnCambiarPass', false);
         }
     });
 });

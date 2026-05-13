@@ -4,6 +4,7 @@ import com.villaticket_backend.modules.evento.application.dtos.CrearZonaRequest;
 import com.villaticket_backend.modules.evento.application.dtos.EditarZonaRequest;
 import com.villaticket_backend.modules.evento.application.dtos.ZonaDTO;
 import com.villaticket_backend.modules.evento.application.use_cases.GestionarZonas;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,8 @@ public class ZonaController {
     private GestionarZonas gestionarZonas;
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> crearZona(@RequestBody CrearZonaRequest request) {
+    public ResponseEntity<Map<String, String>> crearZona(@Valid @RequestBody CrearZonaRequest request) {
         try {
-            // Ahora request.getEventoId() ya funcionará porque lo añadimos al DTO
             gestionarZonas.agregarZona(request.getEventoId(), request);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Zona agregada con éxito.");
@@ -38,7 +38,7 @@ public class ZonaController {
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> actualizarZona(
             @PathVariable Long id,
-            @RequestBody EditarZonaRequest request) {
+            @Valid @RequestBody EditarZonaRequest request) {
         try {
             gestionarZonas.editarZona(id, request);
             Map<String, String> response = new HashMap<>();
@@ -58,8 +58,6 @@ public class ZonaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        // Nota: Asegúrate de tener implementado eliminarZona en GestionarZonas si prefieres usarlo
-        // Por ahora usamos el repositorio directamente para no crear más fallos
         gestionarZonas.eliminarZona(id);
         return ResponseEntity.noContent().build();
     }

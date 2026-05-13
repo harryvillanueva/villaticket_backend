@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Súper Admin - Villaticket</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .admin-table th, .admin-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); color: white; }
+        .admin-table th { background-color: #2a2a35; color: #a1a1aa; text-transform: uppercase; font-size: 0.85rem; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
+        .badge-cancelado { background: #fca5a5; color: #7f1d1d; }
+        .badge-publicado { background: #4ade80; color: #14532d; }
+        .badge-borrador { background: #fbbf24; color: #78350f; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="index.html" class="logo-area" style="text-decoration: none;"><span>🎫</span> Villaticket</a>
+        <button class="menu-toggle" id="menuToggle">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="nav-links" id="navContainer">
+            <div id="nav-user-links" style="display: flex; gap: 15px; align-items: center;">
+                <img id="userAvatarMenu" src="" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid #8b5cf6; display: none;">
+                <a href="perfil.html" class="nav-item">Mi Perfil</a>
+                <a href="#" class="nav-item" onclick="Auth.cerrarSesion()" style="color: #ff4757;">Cerrar sesión</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="container" style="margin-top: 100px;">
+    <h1 class="section-title">Centro de Mando: Súper Admin</h1>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 40px;">
+        <div class="card-evento" style="padding: 25px; text-align: center; border-bottom: 4px solid #8b5cf6;">
+            <h3 style="color: #a1a1aa; font-size: 1rem; margin-bottom: 10px;">Ganancias Villaticket (10%)</h3>
+            <p id="statGanancias" style="font-size: 2.5rem; font-weight: bold; color: #8b5cf6;">0.00 €</p>
+        </div>
+        <div class="card-evento" style="padding: 25px; text-align: center; border-bottom: 4px solid #4ade80;">
+            <h3 style="color: #a1a1aa; font-size: 1rem; margin-bottom: 10px;">Ventas Globales</h3>
+            <p id="statVentas" style="font-size: 2.5rem; font-weight: bold; color: white;">0.00 €</p>
+        </div>
+        <div class="card-evento" style="padding: 25px; text-align: center; border-bottom: 4px solid #fbbf24;">
+            <h3 style="color: #a1a1aa; font-size: 1rem; margin-bottom: 10px;">Tickets Vendidos</h3>
+            <p id="statTickets" style="font-size: 2.5rem; font-weight: bold; color: white;">0</p>
+        </div>
+    </div>
+
+    <h2 class="section-title" style="font-size: 1.5rem; color: #4ade80;">Finanzas: Solicitudes de Retiro</h2>
+    <div class="card-evento" style="padding: 20px; overflow-x: auto; margin-bottom: 50px; border: 1px solid rgba(74,222,128,0.2);">
+        <table class="admin-table">
+            <thead>
+            <tr><th>Vendedor</th><th>IBAN</th><th>Monto</th><th>Estado</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="tablaRetirosAdmin"></tbody>
+        </table>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 40px;">
+        <div>
+            <h2 class="section-title" style="font-size: 1.5rem;">Gestión de Categorías</h2>
+            <div class="card-evento" style="padding: 20px;">
+                <form id="formNuevaCat" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <input type="text" id="nuevaCatNombre" placeholder="Añadir nueva categoría..." required style="flex: 1; padding: 12px; border-radius: 5px; background: #1a1a2e; color: white; border: 1px solid #444;">
+                    <button type="submit" class="btn btn-primary" style="background: #8b5cf6; border: none;">Añadir</button>
+                </form>
+                <table class="admin-table">
+                    <thead><tr><th>ID</th><th>Nombre</th><th>Acción</th></tr></thead>
+                    <tbody id="tablaCategorias"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 50px;">
+            <h2 class="section-title" style="font-size: 1.5rem;">Moderación de Eventos Global</h2>
+            <div class="card-evento" style="padding: 20px; overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                    <tr><th>ID</th><th>Evento</th><th>Fecha</th><th>Categoría</th><th>Estado</th><th>Acción</th></tr>
+                    </thead>
+                    <tbody id="tablaEventos"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/dashboard-admin.js"></script>
+</body>
+</html>

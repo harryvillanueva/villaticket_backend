@@ -7,6 +7,7 @@ import com.villaticket_backend.modules.evento.application.use_cases.*;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.CategoriaEntity;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.entities.EventoEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,70 +17,48 @@ import java.util.List;
 @RequestMapping("/api/eventos")
 public class EventoController {
 
-    @Autowired
-    private CrearEvento crearEvento;
+    @Autowired private CrearEvento crearEvento;
+    @Autowired private ListarEventos listarEventos;
+    @Autowired private ObtenerEvento obtenerEvento;
+    @Autowired private PublicarEvento publicarEvento;
+    @Autowired private ListarCategorias listarCategorias;
+    @Autowired private EditarEvento editarEvento;
+    @Autowired private OcultarEvento ocultarEvento;
 
-    @Autowired
-    private ListarEventos listarEventos;
-
-    @Autowired
-    private ObtenerEvento obtenerEvento;
-
-    @Autowired
-    private PublicarEvento publicarEvento;
-
-    @Autowired
-    private ListarCategorias listarCategorias;
-
-    @Autowired
-    private EditarEvento editarEvento;
-
-    @Autowired
-    private OcultarEvento ocultarEvento;
-
-    // --- CORRECCIÓN AQUÍ: Se añadió "/publicados" a la ruta ---
+    // --- CORRECCIÓN: Endpoint de paginación ---
     @GetMapping("/publicados")
-    public ResponseEntity<List<EventoDTO>> listarTodosPublicados() {
-        List<EventoDTO> eventos = listarEventos.ejecutarPublicos();
-        return ResponseEntity.ok(eventos);
+    public ResponseEntity<Page<EventoDTO>> listarTodosPublicados(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<EventoDTO> eventosPaginados = listarEventos.ejecutarPublicosPaginado(page, size);
+        return ResponseEntity.ok(eventosPaginados);
     }
 
-    // Listar categorías para el formulario
     @GetMapping("/categorias")
     public ResponseEntity<List<CategoriaEntity>> listarCategorias() {
-        List<CategoriaEntity> categorias = listarCategorias.ejecutar();
-        return ResponseEntity.ok(categorias);
+        return ResponseEntity.ok(listarCategorias.ejecutar());
     }
 
-    // Crear Evento
     @PostMapping("/crear")
     public ResponseEntity<EventoEntity> crearEvento(@RequestBody CrearEventoRequest request) {
-        EventoEntity nuevoEvento = crearEvento.ejecutar(request);
-        return ResponseEntity.ok(nuevoEvento);
+        return ResponseEntity.ok(crearEvento.ejecutar(request));
     }
 
-    // Listar eventos del vendedor
     @GetMapping("/vendedor/{email}")
     public ResponseEntity<List<EventoDTO>> listarPorVendedor(@PathVariable String email) {
-        List<EventoDTO> eventos = listarEventos.ejecutarPorVendedor(email);
-        return ResponseEntity.ok(eventos);
+        return ResponseEntity.ok(listarEventos.ejecutarPorVendedor(email));
     }
 
-    // Ver detalles de un evento
     @GetMapping("/{id}")
     public ResponseEntity<EventoDTO> obtenerPorId(@PathVariable Long id) {
-        EventoDTO evento = obtenerEvento.ejecutar(id);
-        return ResponseEntity.ok(evento);
+        return ResponseEntity.ok(obtenerEvento.ejecutar(id));
     }
 
-    // Publicar Evento
     @PutMapping("/{id}/publicar")
     public ResponseEntity<EventoEntity> publicar(@PathVariable Long id) {
-        EventoEntity eventoPublicado = publicarEvento.ejecutar(id);
-        return ResponseEntity.ok(eventoPublicado);
+        return ResponseEntity.ok(publicarEvento.ejecutar(id));
     }
 
-    // Editar Evento
     @PutMapping("/{id}")
     public ResponseEntity<EventoDTO> editar(@PathVariable Long id, @RequestBody EditarEventoRequest request) {
         return ResponseEntity.ok(editarEvento.ejecutar(id, request));
@@ -87,7 +66,6 @@ public class EventoController {
 
     @PutMapping("/{id}/ocultar")
     public ResponseEntity<EventoEntity> ocultar(@PathVariable Long id) {
-        EventoEntity eventoOculto = ocultarEvento.ejecutar(id);
-        return ResponseEntity.ok(eventoOculto);
+        return ResponseEntity.ok(ocultarEvento.ejecutar(id));
     }
 }
