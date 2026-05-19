@@ -12,6 +12,7 @@ async function cargarTodoElPanel() {
     await cargarRetirosAdmin();
     await cargarCategorias();
     await cargarEventos();
+    await cargarUsuarios(); // <-- AÑADIDO: Llama a la carga de usuarios
 }
 
 // --- 1. ESTADÍSTICAS GLOBALES ---
@@ -180,5 +181,74 @@ async function cancelarEvento(id) {
         cargarEventos();
     } catch (error) {
         showToast("Error al cancelar el evento: " + error.message, "error");
+    }
+}
+
+// ==========================================
+// --- 5. GESTIÓN DE USUARIOS (NUEVO) ---
+// ==========================================
+async function cargarUsuarios() {
+    const tabla = document.getElementById('tablaUsuarios');
+    if (!tabla) return;
+    tabla.innerHTML = '<tr><td colspan="6" style="text-align: center;">Cargando usuarios...</td></tr>';
+
+    try {
+        const usuarios = await fetchAPI('/admin/usuarios', 'GET');
+        tabla.innerHTML = '';
+
+        if(usuarios.length === 0) {
+            tabla.innerHTML = '<tr><td colspan="6" style="text-align: center;">No hay usuarios registrados.</td></tr>';
+            return;
+        }
+
+        usuarios.forEach(u => {
+            // Etiquetas visuales para el estado
+            let estadoHtml = u.activo ? '<span class="badge badge-publicado">ACTIVO</span>' : '<span class="badge badge-cancelado">BLOQUEADO</span>';
+            let botonAccion = '';
+
+            // Lógica de botones: No permitimos que un Admin se bloquee a sí mismo visualmente
+            if (u.rol === 'ADMIN') {
+                botonAccion = '<span style="color: #888; font-size: 0.9rem;">Súper Admin</span>';
+            } else if (u.activo) {
+                botonAccion = `<button onclick="bloquearUsuario(${u.id})" style="background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Bloquear</button>`;
+            } else {
+                botonAccion = `<button onclick="activarUsuario(${u.id})" style="background: #4ade80; color: #14532d; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">Activar</button>`;
+            }
+
+            tabla.innerHTML += `
+                <tr>
+                    <td>${u.id}</td>
+                    <td><strong>${u.nombre}</strong></td>
+                    <td>${u.email}</td>
+                    <td><span class="badge" style="background: #374151;">${u.rol}</span></td>
+                    <td>${estadoHtml}</td>
+                    <td>${botonAccion}</td>
+                </tr>
+            `;
+        });
+    } catch (e) {
+        tabla.innerHTML = '<tr><td colspan="6" style="color: #ff4757;">Error al cargar usuarios</td></tr>';
+    }
+}
+
+async function bloquearUsuario(id) {
+    if (!confirm("🚨 ATENCIÓN: ¿Seguro que deseas BLOQUEAR a este usuario? Perderá acceso inmediato a su cuenta y no podrá iniciar sesión.")) return;
+    try {
+        await fetchAPI(`/admin/usuarios/${id}/bloquear`, 'PUT');
+        showToast("Usuario bloqueado exitosamente.", "success");
+        cargarUsuarios(); // Refrescar solo la tabla de usuarios
+    } catch (error) {
+        showToast("Error al bloquear: " + error.message, "error");
+    }
+}
+
+async function activarUsuario(id) {
+    if (!confirm("✅ ¿Deseas REACTIVAR el acceso de este usuario a la plataforma?")) return;
+    try {
+        await fetchAPI(`/admin/usuarios/${id}/activar`, 'PUT');
+        showToast("Usuario activado exitosamente.", "success");
+        cargarUsuarios(); // Refrescar solo la tabla de usuarios
+    } catch (error) {
+        showToast("Error al activar: " + error.message, "error");
     }
 }

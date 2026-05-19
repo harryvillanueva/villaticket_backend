@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/eventos")
@@ -55,8 +56,9 @@ public class EventoController {
     }
 
     @PutMapping("/{id}/publicar")
-    public ResponseEntity<EventoEntity> publicar(@PathVariable Long id) {
-        return ResponseEntity.ok(publicarEvento.ejecutar(id));
+    public ResponseEntity<Map<String, String>> publicar(@PathVariable Long id) {
+        publicarEvento.ejecutar(id);
+        return ResponseEntity.ok(Map.of("message", "Evento publicado exitosamente"));
     }
 
     @PutMapping("/{id}")
@@ -65,7 +67,8 @@ public class EventoController {
     }
 
     @PutMapping("/{id}/ocultar")
-    public ResponseEntity<EventoEntity> ocultar(@PathVariable Long id) {
-        return ResponseEntity.ok(ocultarEvento.ejecutar(id));
+    public ResponseEntity<Map<String, String>> ocultar(@PathVariable Long id) {
+        ocultarEvento.ejecutar(id);
+        return ResponseEntity.ok(Map.of("message", "Evento ocultado exitosamente"));
     }
 }

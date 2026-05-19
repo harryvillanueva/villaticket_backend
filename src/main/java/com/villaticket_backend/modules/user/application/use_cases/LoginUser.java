@@ -25,40 +25,37 @@ public class LoginUser {
     @Autowired
     private JwtService jwtService;
 
-    // Usamos el validador de contraseñas directo en lugar del AuthenticationManager
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     public LoginResponse ejecutar(LoginRequest request) {
 
-        // 1. Buscamos al usuario directamente en la base de datos por su email
         UsuarioEntity usuario = usuarioRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Credenciales incorrectas"));
 
-        // 2. Comparamos la contraseña en texto plano con la encriptada en la base de datos
+        // ---> NUEVA VALIDACIÓN: Verificar si el usuario está bloqueado <---
+        if (usuario.getActivo() != null && !usuario.getActivo()) {
+            throw new RuntimeException("Tu cuenta ha sido bloqueada por un administrador.");
+        }
+
         if (!passwordEncoder.matches(request.getPassword(), usuario.getPassword())) {
             throw new RuntimeException("Credenciales incorrectas");
         }
 
-        // 3. Extraer el rol (por defecto será CLIENTE si ocurre alguna anomalía)
         String rolNombre = usuario.getRol() != null ? usuario.getRol().getNombre() : "CLIENTE";
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority(rolNombre);
 
-        // 4. Crear el objeto UserDetails que la seguridad de Spring requiere
         UserDetails userDetails = new User(
                 usuario.getEmail(),
                 usuario.getPassword(),
                 Collections.singletonList(authority)
         );
 
-        // 5. Crear un Map para guardar información extra dentro del token (como el rol)
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("rol", rolNombre);
 
-        // 6. Generar el token JWT
         String token = jwtService.generateToken(extraClaims, userDetails);
 
-        // 7. Retornar la respuesta
         return new LoginResponse(token, usuario.getEmail(), rolNombre);
     }
 }

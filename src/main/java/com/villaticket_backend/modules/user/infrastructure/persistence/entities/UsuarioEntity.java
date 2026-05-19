@@ -28,14 +28,17 @@ public class UsuarioEntity {
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
 
-    // --- CAMBIO AQUI: Relación con RolEntity ---
-    @ManyToOne(fetch = FetchType.EAGER) // EAGER para que traiga el rol al buscar el usuario (útil para el Login)
+    // --- NUEVO CAMPO: Control de bloqueo de usuarios ---
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean activo = true;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id", nullable = false)
     private RolEntity rol;
 
     public UsuarioEntity() {}
 
-    // Getters y Setters...
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getEmail() { return email; }
@@ -50,7 +53,8 @@ public class UsuarioEntity {
     public void setUrlAvatar(String urlAvatar) { this.urlAvatar = urlAvatar; }
     public LocalDateTime getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }
-
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
     public RolEntity getRol() { return rol; }
     public void setRol(RolEntity rol) { this.rol = rol; }
 }

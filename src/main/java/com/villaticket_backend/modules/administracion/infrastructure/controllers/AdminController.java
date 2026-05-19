@@ -10,6 +10,8 @@ import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.Jpa
 import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaEventoRepository;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaRetiroRepository;
 import com.villaticket_backend.modules.evento.infrastructure.persistence.jpa.JpaTicketRepository;
+import com.villaticket_backend.modules.user.infrastructure.persistence.entities.UsuarioEntity;
+import com.villaticket_backend.modules.user.infrastructure.persistence.jpa.JpaUsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +28,10 @@ public class AdminController {
     @Autowired private JpaEventoRepository eventoRepository;
     @Autowired private JpaCategoriaRepository categoriaRepository;
     @Autowired private JpaTicketRepository ticketRepository;
-
-    // NUEVO REPOSITORIO
     @Autowired private JpaRetiroRepository retiroRepository;
+
+    // ---> NUEVO REPOSITORIO INYECTADO PARA USUARIOS <---
+    @Autowired private JpaUsuarioRepository usuarioRepository;
 
     @GetMapping("/estadisticas")
     public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
@@ -84,7 +87,6 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "Categoría eliminada"));
     }
 
-    // --- NUEVAS RUTAS DE RETIROS ---
     @GetMapping("/retiros")
     public ResponseEntity<List<RetiroDTO>> listarRetiros() {
         List<RetiroEntity> retiros = retiroRepository.findAll();
@@ -107,5 +109,45 @@ public class AdminController {
         retiro.setEstado("APROBADO");
         retiroRepository.save(retiro);
         return ResponseEntity.ok(Map.of("message", "Retiro aprobado y transferencia completada."));
+    }
+
+    // ==========================================
+    // ---> NUEVAS RUTAS DE GESTIÓN DE USUARIOS
+    // ==========================================
+
+    @GetMapping("/usuarios")
+    public ResponseEntity<List<Map<String, Object>>> listarUsuarios() {
+        List<UsuarioEntity> usuarios = usuarioRepository.findAll();
+        List<Map<String, Object>> response = usuarios.stream().map(u -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", u.getId());
+            map.put("nombre", u.getNombre());
+            map.put("email", u.getEmail());
+            map.put("rol", u.getRol() != null ? u.getRol().getNombre() : "N/A");
+            map.put("activo", u.getActivo() != null ? u.getActivo() : true);
+            if (u.getFechaRegistro() != null) {
+                map.put("fechaRegistro", u.getFechaRegistro().toString());
+            }
+            return map;
+        }).collect(Collectors.toList());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/usuarios/{id}/bloquear")
+    public ResponseEntity<Map<String, String>> bloquearUsuario(@PathVariable Long id) {
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setActivo(false);
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok(Map.of("message", "Usuario bloqueado exitosamente."));
+    }
+
+    @PutMapping("/usuarios/{id}/activar")
+    public ResponseEntity<Map<String, String>> activarUsuario(@PathVariable Long id) {
+        UsuarioEntity usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        usuario.setActivo(true);
+        usuarioRepository.save(usuario);
+        return ResponseEntity.ok(Map.of("message", "Usuario activado exitosamente."));
     }
 }

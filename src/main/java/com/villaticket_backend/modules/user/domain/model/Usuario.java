@@ -11,6 +11,7 @@ public class Usuario {
     private String iban;
     private String urlAvatar;
     private LocalDateTime fechaRegistro;
+    private Boolean activo;
 
     public Usuario() {}
 
@@ -33,4 +34,6 @@ public class Usuario {
     public void setUrlAvatar(String urlAvatar) { this.urlAvatar = urlAvatar; }
     public LocalDateTime getFechaRegistro() { return fechaRegistro; }
     public void setFechaRegistro(LocalDateTime fechaRegistro) { this.fechaRegistro = fechaRegistro; }
+    public Boolean getActivo() { return activo; }
+    public void setActivo(Boolean activo) { this.activo = activo; }
 }

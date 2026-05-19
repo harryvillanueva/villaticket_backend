@@ -11,9 +11,8 @@ import org.springframework.stereotype.Component;
 public class UsuarioMapper {
 
     @Autowired
-    private JpaRolRepository rolRepository; // Necesitamos esto para buscar el rol real
+    private JpaRolRepository rolRepository;
 
-    // De Dominio a Entidad (para guardar)
     public UsuarioEntity toEntity(Usuario domain) {
         if (domain == null) return null;
 
@@ -26,7 +25,9 @@ public class UsuarioMapper {
         entity.setUrlAvatar(domain.getUrlAvatar());
         entity.setFechaRegistro(domain.getFechaRegistro());
 
-        // Magia del Mapper: Buscar el rol por nombre y asignarlo a la entidad
+        // Asignamos el estado si existe, si no, por defecto activo
+        entity.setActivo(domain.getActivo() != null ? domain.getActivo() : true);
+
         if (domain.getRolNombre() != null) {
             RolEntity rolEntity = rolRepository.findByNombre(domain.getRolNombre())
                     .orElseThrow(() -> new RuntimeException("Error: El rol " + domain.getRolNombre() + " no existe en la BD"));
@@ -36,7 +37,6 @@ public class UsuarioMapper {
         return entity;
     }
 
-    // De Entidad a Dominio (para devolver al controlador)
     public Usuario toDomain(UsuarioEntity entity) {
         if (entity == null) return null;
 
@@ -48,6 +48,7 @@ public class UsuarioMapper {
         domain.setIban(entity.getIban());
         domain.setUrlAvatar(entity.getUrlAvatar());
         domain.setFechaRegistro(entity.getFechaRegistro());
+        domain.setActivo(entity.getActivo()); // <-- Mapeamos el nuevo campo
 
         if (entity.getRol() != null) {
             domain.setRolNombre(entity.getRol().getNombre());
