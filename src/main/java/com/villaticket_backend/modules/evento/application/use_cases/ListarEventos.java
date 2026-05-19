@@ -28,7 +28,7 @@ public class ListarEventos {
         return mapearLista(entidades);
     }
 
-    // --- NUEVO: Ejecutar con paginación ---
+
     public Page<EventoDTO> ejecutarPublicosPaginado(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<EventoEntity> eventosPage = eventoRepository.findByEstado("PUBLICADO", pageable);

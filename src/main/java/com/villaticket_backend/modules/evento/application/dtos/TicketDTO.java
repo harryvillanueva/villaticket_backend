@@ -11,8 +11,6 @@ public class TicketDTO {
     private String eventoHora;
     private String zonaNombre;
     private BigDecimal precioPagado;
-
-    // NUEVOS CAMPOS
     private String nombreAsistente;
     private String documentoAsistente;
 

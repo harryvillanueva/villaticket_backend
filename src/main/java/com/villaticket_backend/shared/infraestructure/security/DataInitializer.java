@@ -67,7 +67,7 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println(">>> Usuario SÚPER ADMIN creado exitosamente: " + adminEmail);
         }
 
-        // --- INICIALIZAR CATEGORÍAS (Tu código original intacto) ---
+        // --- INICIALIZAR CATEGORÍAS
         crearCategoriaSiNoExiste("Concierto", "Música en vivo y festivales");
         crearCategoriaSiNoExiste("Teatro", "Obras teatrales y musicales");
         crearCategoriaSiNoExiste("Deportes", "Eventos deportivos y competiciones");

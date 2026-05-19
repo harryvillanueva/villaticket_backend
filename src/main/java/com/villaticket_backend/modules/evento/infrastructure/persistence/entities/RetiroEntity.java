@@ -16,7 +16,7 @@ public class RetiroEntity {
     private Double monto;
 
     @Column(nullable = false)
-    private String estado; // PENDIENTE, APROBADO, RECHAZADO
+    private String estado;
 
     private LocalDateTime fechaSolicitud;
 

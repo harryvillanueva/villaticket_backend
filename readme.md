@@ -49,3 +49,9 @@ El sistema implementa una **Arquitectura Hexagonal (Puertos y Adaptadores)** que
   spring.datasource.url=jdbc:mysql://localhost:3306/tfg_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
   spring.datasource.username=root
   spring.datasource.password=tu_contraseña_mysql
+  spring.mail.host=smtp.gmail.com
+  spring.mail.port=587
+  spring.mail.username=tu_correo@gmail.com
+  spring.mail.password=tu_contraseña_de_aplicacion_generada
+  spring.mail.properties.mail.smtp.auth=true
+  spring.mail.properties.mail.smtp.starttls.enable=true

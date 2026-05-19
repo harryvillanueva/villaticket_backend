@@ -32,7 +32,7 @@ public class GestionarZonas {
         zona.setNombre(request.getNombre());
         zona.setCapacidadTotal(request.getCapacidadTotal());
         zona.setCapacidadActual(request.getCapacidadTotal());
-        zona.setPrecio(request.getPrecio()); // request.getPrecio() ya es BigDecimal
+        zona.setPrecio(request.getPrecio());
         zona.setEvento(evento);
 
         zonaRepository.save(zona);
@@ -47,7 +47,7 @@ public class GestionarZonas {
 
         zona.setNombre(request.getNombre());
         zona.setCapacidadTotal(request.getCapacidadTotal());
-        zona.setPrecio(request.getPrecio()); // request.getPrecio() ya es BigDecimal
+        zona.setPrecio(request.getPrecio());
         zona.setCapacidadActual(zona.getCapacidadActual() + diferencia);
 
         zonaRepository.save(zona);
@@ -61,7 +61,7 @@ public class GestionarZonas {
                         z.getNombre(),
                         z.getCapacidadTotal(),
                         z.getCapacidadActual(),
-                        z.getPrecio() // Sin conversiones, ambos son BigDecimal
+                        z.getPrecio()
                 ))
                 .collect(Collectors.toList());
     }

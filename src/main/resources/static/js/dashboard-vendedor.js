@@ -62,7 +62,7 @@ async function solicitarRetiro() {
     try {
         await fetchAPI('/eventos/vendedor/finanzas/solicitar', 'POST', { monto: monto });
         showToast("Solicitud de retiro enviada con éxito. El administrador la revisará pronto.", "success");
-        cargarMonedero(); // Refrescamos las cifras
+        cargarMonedero();
     } catch (error) {
         showToast(error.message || "Error al solicitar el retiro. ¿Tienes configurado tu IBAN en el perfil?", "error");
     }
@@ -146,7 +146,7 @@ async function cargarDashboard() {
                 imagenSrc = window.location.origin + imagenSrc;
             }
             if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
-                imagenSrc = 'css/img/no-image.png'; // Evitamos el bucle del placeholder
+                imagenSrc = 'css/img/no-image.png';
             }
 
             let estaCaducado = false;

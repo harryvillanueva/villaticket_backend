@@ -7,7 +7,7 @@ public class Usuario {
     private String email;
     private String password;
     private String nombre;
-    private String rolNombre; // <-- Guardaremos solo el nombre del rol en el dominio ('CLIENTE', 'VENDEDOR')
+    private String rolNombre;
     private String iban;
     private String urlAvatar;
     private LocalDateTime fechaRegistro;
@@ -15,11 +15,11 @@ public class Usuario {
 
     public Usuario() {}
 
-    // Actualiza el constructor y los getters/setters para usar 'rolNombre' en lugar de 'rol'
+
     public String getRolNombre() { return rolNombre; }
     public void setRolNombre(String rolNombre) { this.rolNombre = rolNombre; }
 
-    // ... mantén los demás getters y setters iguales ...
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getEmail() { return email; }

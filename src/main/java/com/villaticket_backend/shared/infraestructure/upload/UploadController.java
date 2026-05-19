@@ -29,15 +29,9 @@ public class UploadController {
             if (!Files.exists(pathDir)) {
                 Files.createDirectories(pathDir);
             }
-
-            // Generar un nombre único para evitar duplicados
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
             Path path = Paths.get(uploadDir + fileName);
-
-            // Guardar el archivo
             Files.write(path, file.getBytes());
-
-            // --- SOLUCIÓN: Retornamos un objeto JSON con la URL ---
             String fileUrl = "/uploads/" + fileName;
             return ResponseEntity.ok(Map.of("url", fileUrl));
 

@@ -33,7 +33,7 @@ public class LoginUser {
         UsuarioEntity usuario = usuarioRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Credenciales incorrectas"));
 
-        // ---> NUEVA VALIDACIÓN: Verificar si el usuario está bloqueado <---
+        // Verificar si el usuario está bloqueado
         if (usuario.getActivo() != null && !usuario.getActivo()) {
             throw new RuntimeException("Tu cuenta ha sido bloqueada por un administrador.");
         }

@@ -10,7 +10,5 @@ import java.util.List;
 public interface JpaEventoRepository extends JpaRepository<EventoEntity, Long> {
     List<EventoEntity> findByVendedor_Email(String email);
     List<EventoEntity> findByEstado(String estado);
-
-    // NUEVO: Método para soportar la Paginación
     Page<EventoEntity> findByEstado(String estado, Pageable pageable);
 }

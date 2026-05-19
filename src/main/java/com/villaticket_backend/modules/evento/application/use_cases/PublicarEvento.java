@@ -14,11 +14,11 @@ public class PublicarEvento {
 
     @Transactional
     public EventoEntity ejecutar(Long id) {
-        // Buscamos el evento por su ID
+
         EventoEntity evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error: Evento no encontrado en la base de datos"));
 
-        // Cambiamos el estado cumpliendo con la regla de negocio del TFG
+
         evento.setEstado("PUBLICADO");
 
         return eventoRepository.save(evento);

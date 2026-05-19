@@ -20,7 +20,7 @@ public class ImagenEventoEntity {
     @JoinColumn(name = "evento_id", nullable = false)
     private EventoEntity evento;
 
-    // --- Constructores ---
+
 
     public ImagenEventoEntity() {
     }
@@ -32,7 +32,7 @@ public class ImagenEventoEntity {
         this.evento = evento;
     }
 
-    // --- Getters y Setters explícitos ---
+
 
     public Long getId() {
         return id;
@@ -46,7 +46,7 @@ public class ImagenEventoEntity {
         return urlImagen;
     }
 
-    // ¡ESTE ES EL MÉTODO QUE JAVA NO ENCONTRABA!
+
     public void setUrlImagen(String urlImagen) {
         this.urlImagen = urlImagen;
     }

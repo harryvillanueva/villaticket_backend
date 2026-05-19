@@ -1,7 +1,3 @@
-/**
- * index.js - Cartelera con Buscador y Filtros por Chips
- */
-
 let todosLosEventos = [];
 let categoriaSeleccionada = 'todas';
 let textoBusqueda = '';
@@ -12,15 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const chipsCategorias = document.querySelectorAll('.chip');
 
     if (!contenedorEventos) return;
-
-    // 1. CARGA INICIAL (Conectado a la paginación del Backend)
     try {
         contenedorEventos.innerHTML = '<p style="color: white; text-align: center; grid-column: 1/-1;">Cargando cartelera...</p>';
-
-        // Obtenemos los primeros 50 eventos
         const responseData = await fetchAPI('/eventos/publicados?page=0&size=50', 'GET');
-
-        // Compatibilidad: Si Spring envía un "Page", los datos están en .content
         todosLosEventos = responseData.content ? responseData.content : responseData;
 
         filtrarYMostrar();
@@ -40,7 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. LÓGICA DE CATEGORÍAS (CHIPS)
     chipsCategorias.forEach(chip => {
         chip.addEventListener('click', () => {
-            // Estética: Cambiar el chip activo
             chipsCategorias.forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
 
@@ -55,7 +44,6 @@ function filtrarYMostrar() {
     const contenedorEventos = document.getElementById('eventosGrid');
 
     const eventosFiltrados = todosLosEventos.filter(evento => {
-        // Filtro por categoría (comparamos con el data-categoria del chip)
         const coincideCategoria = (categoriaSeleccionada === 'todas' || evento.categoriaNombre === categoriaSeleccionada);
 
         // Filtro por texto
@@ -80,13 +68,13 @@ function filtrarYMostrar() {
         const ubicacion = evento.ubicacion || 'Ubicación por definir';
         const categoria = evento.categoriaNombre || 'General';
 
-        // --- CORRECCIÓN DE RUTAS DE IMAGEN PARA EVITAR ERRORES DE PLACEHOLDER ---
+
         let imagenSrc = evento.imagenUrl || evento.imagen;
         if (imagenSrc && imagenSrc.startsWith('/')) {
             imagenSrc = window.location.origin + imagenSrc;
         }
         if (!imagenSrc || imagenSrc === 'null' || imagenSrc === 'undefined') {
-            imagenSrc = 'css/img/no-image.png'; // Usamos una imagen local u omitimos
+            imagenSrc = 'css/img/no-image.png';
         }
 
         // Evaluar caducidad

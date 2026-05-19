@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let modoEdicion = false;
     let zonaIdEdicion = null;
 
-    // --- 1. CONFIGURACIÓN INICIAL (Cerrar Sesión) ---
+    // --- 1. CONFIGURACIÓN INICIAL  ---
     const btnCerrarSesion = document.getElementById('btnCerrarSesion');
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener('click', (e) => {
@@ -82,12 +82,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('nombreZona').value = nombre;
         document.getElementById('capacidadZona').value = capacidad;
         document.getElementById('precioZona').value = precio;
-
-        // Hacer scroll suave hacia el formulario
         document.querySelector('.auth-card').scrollIntoView({ behavior: 'smooth' });
     };
 
-    // --- 5. CREAR O EDITAR (SUBMIT) ---
+    // --- 5. CREAR O EDITAR  ---
     formCrearZona.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -113,7 +111,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showToast("Nueva zona añadida.", "success");
             }
 
-            // Resetear Formulario
             formCrearZona.reset();
             modoEdicion = false;
             zonaIdEdicion = null;
@@ -141,6 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Inicialización
+
     cargarZonas();
 });

@@ -18,14 +18,12 @@ public class EditarZona {
         ZonaEntity zona = zonaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Zona no encontrada"));
 
-        // Calculamos la diferencia por si el vendedor aumenta o reduce el aforo total
+
         int diferencia = request.getCapacidadTotal() - zona.getCapacidadTotal();
 
         zona.setNombre(request.getNombre());
         zona.setCapacidadTotal(request.getCapacidadTotal());
         zona.setPrecio(request.getPrecio());
-
-        // Ajustamos la capacidad actual (stock) en base a la diferencia
         zona.setCapacidadActual(zona.getCapacidadActual() + diferencia);
 
         return zonaRepository.save(zona);

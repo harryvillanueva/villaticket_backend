@@ -26,7 +26,7 @@ public class EventoController {
     @Autowired private EditarEvento editarEvento;
     @Autowired private OcultarEvento ocultarEvento;
 
-    // --- CORRECCIÓN: Endpoint de paginación ---
+
     @GetMapping("/publicados")
     public ResponseEntity<Page<EventoDTO>> listarTodosPublicados(
             @RequestParam(defaultValue = "0") int page,

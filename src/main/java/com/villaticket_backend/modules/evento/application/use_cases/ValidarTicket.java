@@ -16,18 +16,14 @@ public class ValidarTicket {
 
     public Map<String, Object> ejecutar(String codigoQr) {
         Map<String, Object> respuesta = new HashMap<>();
-
-        // Buscamos el ticket usando el método exacto que ya tienes en tu repositorio
         TicketEntity ticket = ticketRepository.findByCodigoQr(codigoQr);
-
-        // Si es null, significa que ese código QR es falso o no existe
         if (ticket == null) {
             respuesta.put("valido", false);
             respuesta.put("mensaje", "❌ QR Inválido: Ticket no encontrado en el sistema.");
             return respuesta;
         }
 
-        // Verificamos si alguien ya entró con este ticket antes
+
         if ("USADO".equalsIgnoreCase(ticket.getEstado())) {
             respuesta.put("valido", false);
             respuesta.put("mensaje", "⚠️ ALERTA: Este ticket ya fue escaneado anteriormente.");
@@ -35,7 +31,7 @@ public class ValidarTicket {
             return respuesta;
         }
 
-        // Si es válido, le damos acceso y "quemamos" el ticket
+
         ticket.setEstado("USADO");
         ticketRepository.save(ticket);
 

@@ -7,11 +7,11 @@ public class EditarEventoRequest {
     private String hora;
     private String ubicacion;
     private Long categoriaId;
-    private String imagen; // Debe llamarse imagen para mapear con el frontend
+    private String imagen;
 
     public EditarEventoRequest() {}
 
-    // Getters y Setters
+
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
     public String getDescripcion() { return descripcion; }

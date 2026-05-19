@@ -29,8 +29,6 @@ public class AdminController {
     @Autowired private JpaCategoriaRepository categoriaRepository;
     @Autowired private JpaTicketRepository ticketRepository;
     @Autowired private JpaRetiroRepository retiroRepository;
-
-    // ---> NUEVO REPOSITORIO INYECTADO PARA USUARIOS <---
     @Autowired private JpaUsuarioRepository usuarioRepository;
 
     @GetMapping("/estadisticas")
@@ -111,9 +109,6 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "Retiro aprobado y transferencia completada."));
     }
 
-    // ==========================================
-    // ---> NUEVAS RUTAS DE GESTIÓN DE USUARIOS
-    // ==========================================
 
     @GetMapping("/usuarios")
     public ResponseEntity<List<Map<String, Object>>> listarUsuarios() {

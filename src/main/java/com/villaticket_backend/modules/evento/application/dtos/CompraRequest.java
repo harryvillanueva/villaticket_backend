@@ -7,7 +7,6 @@ public class CompraRequest {
     private Long zonaId;
     private String usuarioEmail;
 
-    // CAMBIO CLAVE: Cambiamos "Integer cantidad" por una lista de personas
     private List<AsistenteDTO> asistentes;
 
     public CompraRequest() {}
@@ -21,7 +20,7 @@ public class CompraRequest {
     public List<AsistenteDTO> getAsistentes() { return asistentes; }
     public void setAsistentes(List<AsistenteDTO> asistentes) { this.asistentes = asistentes; }
 
-    // Clase interna para manejar los datos de cada persona
+
     public static class AsistenteDTO {
         private String nombre;
         private String documento;

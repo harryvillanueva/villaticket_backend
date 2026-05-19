@@ -8,16 +8,16 @@ public class CrearEventoRequest {
     private String fecha;
     private String hora;
     private String ubicacion;
-    private String imagen; // URL de la imagen principal
+    private String imagen;
     private String vendedorEmail;
     private Long categoriaId;
-    private List<String> galeria; // Lista de URLs de la galería
+    private List<String> galeria;
 
-    // Constructor vacío obligatorio para que Spring pueda instanciar la clase
+
     public CrearEventoRequest() {
     }
 
-    // --- Getters y Setters ---
+
 
     public String getTitulo() {
         return titulo;

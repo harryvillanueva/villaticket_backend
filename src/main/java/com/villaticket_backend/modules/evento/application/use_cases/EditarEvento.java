@@ -23,7 +23,7 @@ public class EditarEvento {
     private JpaCategoriaRepository categoriaRepository;
 
     @Transactional
-    public EventoDTO ejecutar(Long id, EditarEventoRequest request) { // Cambiar retorno a DTO
+    public EventoDTO ejecutar(Long id, EditarEventoRequest request) {
         EventoEntity evento = eventoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
@@ -43,7 +43,7 @@ public class EditarEvento {
 
         EventoEntity guardado = eventoRepository.save(evento);
 
-        // Convertir la entidad a DTO antes de devolverla para evitar errores de Jackson/Hibernate
+
         EventoDTO dto = new EventoDTO();
         dto.setId(guardado.getId());
         dto.setTitulo(guardado.getTitulo());

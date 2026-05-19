@@ -23,14 +23,14 @@ public class ZonaEntity {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal precio;
 
-    // Relación con Evento
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "evento_id", nullable = false)
     private EventoEntity evento;
 
     public ZonaEntity() {}
 
-    // Getters y Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getNombre() { return nombre; }

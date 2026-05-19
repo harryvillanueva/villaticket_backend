@@ -33,15 +33,13 @@ public class CrearEvento {
 
     @Transactional // Garantiza que si algo falla, no se guarde nada a medias
     public EventoEntity ejecutar(CrearEventoRequest request) {
-
-        // 1. Buscamos al vendedor y la categoría
         UsuarioEntity vendedor = usuarioRepository.findByEmail(request.getVendedorEmail())
                 .orElseThrow(() -> new RuntimeException("Vendedor no encontrado"));
 
         CategoriaEntity categoria = categoriaRepository.findById(request.getCategoriaId())
                 .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
 
-        // 2. Preparamos el evento (asegúrate de que EventoEntity tenga los setters creados manualmente)
+
         EventoEntity evento = new EventoEntity();
         evento.setTitulo(request.getTitulo());
         evento.setDescripcion(request.getDescripcion());
@@ -53,10 +51,10 @@ public class CrearEvento {
         evento.setVendedor(vendedor);
         evento.setCategoria(categoria);
 
-        // 3. Guardamos el evento para generar su ID
+
         EventoEntity eventoGuardado = eventoRepository.save(evento);
 
-        // 4. Guardamos la galería de imágenes si el usuario envió alguna
+
         if (request.getGaleria() != null && !request.getGaleria().isEmpty()) {
             int orden = 1;
             for (String urlImagen : request.getGaleria()) {

@@ -17,7 +17,7 @@ public class PerfilDTO {
         this.iban = iban;
     }
 
-    // Getters y Setters
+
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getEmail() { return email; }

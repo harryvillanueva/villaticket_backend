@@ -12,7 +12,7 @@ public class EventoDTO {
     private String ubicacion;
     private String estado;
     private String categoriaNombre;
-    private List<String> galeria; // Añadimos la galería
+    private List<String> galeria;
 
     public EventoDTO() {}
 

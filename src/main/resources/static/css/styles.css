@@ -1,6 +1,4 @@
 /* --- ESTILOS ESPECÍFICOS PARA AUTH (LOGIN/REGISTER) --- */
-
-/* Fondo especial para login/registro con un sutil destello rosa */
 .auth-body {
     background-color: var(--bg-body);
     background-image: radial-gradient(circle at top right, rgba(255, 45, 85, 0.05), transparent 40%);
@@ -10,7 +8,7 @@
 }
 
 .auth-container {
-    flex-grow: 1; /* Ocupa el espacio restante bajo el navbar */
+    flex-grow: 1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,9 +50,9 @@
 /* Selector de Roles estilo Pill (Pastilla) */
 .role-selector {
     display: flex;
-    background-color: #27272a; /* Fondo oscuro del input */
+    background-color: #27272a;
     padding: 4px;
-    border-radius: 8px; /* Bordes suaves */
+    border-radius: 8px;
     margin-bottom: 5px;
     border: 1px solid var(--border);
 }
@@ -64,7 +62,7 @@
     text-align: center;
     padding: 10px;
     cursor: pointer;
-    border-radius: 6px; /* Bordes interiores */
+    border-radius: 6px;
     font-size: 0.9rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -76,15 +74,13 @@
     color: var(--text-main);
 }
 
-/* El botón seleccionado se enciende con tu color principal */
+
 .role-option.active {
     background-color: var(--primary);
     color: white;
-    /* Sombra sutil del color primario */
     box-shadow: 0 4px 12px rgba(255, 45, 85, 0.3);
 }
 
-/* Enlaces del pie del formulario */
 .auth-footer {
     text-align: center;
     margin-top: 1.5rem;
@@ -117,23 +113,21 @@
 }
 
 
-/*------- diseños de eliminar despues --------------*/
+
 
 :root {
-    /* Paleta Oscura inspirada en Joinnus pero Dark */
-    --bg-body: #121212;        /* Fondo muy oscuro */
-    --bg-card: #1e1e1e;        /* Tarjetas un poco más claras */
-    --bg-header: #18181b;      /* Header sólido */
 
-    /* Colores de Acento */
-    --primary: #ff2d55;        /* El Rojo/Rosa Joinnus vibrante */
+    --bg-body: #121212;
+    --bg-card: #1e1e1e;
+    --bg-header: #18181b;
+
+    --primary: #ff2d55;
     --primary-hover: #e01b42;
 
-    /* Textos */
     --text-main: #ffffff;
     --text-muted: #a1a1aa;
 
-    /* Bordes y UI */
+
     --border: #3f3f46;
     --radius: 12px;
 }
@@ -142,7 +136,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif; /* Tipografía moderna */
+    font-family: 'Inter', sans-serif;
 }
 
 body {
@@ -179,7 +173,7 @@ body {
     cursor: pointer;
 }
 
-/* Barra de Búsqueda estilo Joinnus */
+/* Barra de Búsqueda  */
 .search-bar {
     background-color: #27272a;
     border-radius: 50px;
@@ -277,7 +271,7 @@ body {
     gap: 10px;
     overflow-x: auto;
     padding-bottom: 10px;
-    margin-top: -30px; /* Efecto flotante sobre el hero */
+    margin-top: -30px;
     position: relative;
     z-index: 10;
 }
@@ -311,7 +305,7 @@ body {
     gap: 24px;
 }
 
-/* Tarjeta estilo Joinnus Dark */
+/* Tarjetas */
 .card-evento {
     background-color: var(--bg-card);
     border-radius: var(--radius);
@@ -339,7 +333,7 @@ body {
     object-fit: cover;
 }
 
-/* Badge de fecha sobre la imagen */
+
 .date-badge {
     position: absolute;
     top: 10px;
@@ -467,7 +461,7 @@ body {
     .hero-content h1 { font-size: 2rem; }
 }
 
-/* --- ESTILOS DE AUTENTICACIÓN (LOGIN/REGISTER) --- */
+
 
 .auth-body {
     background-image: radial-gradient(circle at top right, rgba(255, 45, 85, 0.1), transparent 40%),
@@ -475,7 +469,7 @@ body {
 }
 
 .auth-container {
-    min-height: calc(100vh - 140px); /* Restamos header/footer aprox */
+    min-height: calc(100vh - 140px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -527,7 +521,7 @@ body {
 
 .form-control {
     width: 100%;
-    background-color: #27272a; /* Input oscuro */
+    background-color: #27272a;
     border: 1px solid var(--border);
     padding: 12px 16px;
     border-radius: 8px;
@@ -542,7 +536,7 @@ body {
     box-shadow: 0 0 0 3px rgba(255, 45, 85, 0.2);
 }
 
-/* Selector de Rol (Cliente vs Vendedor) */
+
 .role-selector {
     display: flex;
     background-color: #27272a;
@@ -562,10 +556,10 @@ body {
     font-weight: 600;
     color: var(--text-muted);
     transition: 0.3s;
-    user-select: none; /* Evita que se seleccione el texto */
+    user-select: none;
 }
 
-/* La clase .active se pone con JS */
+
 .role-option.active {
     background-color: var(--primary);
     color: white;
@@ -593,7 +587,7 @@ body {
     color: #ff4757;
     font-size: 0.85rem;
     margin-top: 5px;
-    display: none; /* Se muestra con JS */
+    display: none;
 }
 
 /* --- ESTILOS CREAR EVENTO --- */
@@ -614,7 +608,7 @@ body {
 
 .upload-icon { font-size: 3rem; color: var(--text-muted); margin-bottom: 10px; }
 
-/* --- ESTILOS MIS TICKETS (El diseño "Entrada Real") --- */
+/* --- ESTILOS MIS TICKETS  --- */
 .ticket-container {
     display: flex;
     flex-direction: column;
@@ -637,9 +631,9 @@ body {
     transform: translateX(5px);
 }
 
-/* Parte Izquierda (Info Evento) */
+
 .ticket-left {
-    flex: 1; /* Ocupa todo el espacio posible */
+    flex: 1;
     padding: 25px;
     display: flex;
     flex-direction: column;
@@ -648,7 +642,7 @@ body {
     position: relative;
 }
 
-/* Los "mordiscos" o agujeros del ticket */
+
 .ticket-left::after, .ticket-left::before {
     content: '';
     position: absolute;
@@ -664,18 +658,18 @@ body {
 .ticket-event-title { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 10px;}
 .ticket-meta { color: var(--text-muted); margin-bottom: 5px; display: flex; align-items: center; gap: 5px;}
 
-/* Parte Derecha (QR) */
+
 .ticket-right {
     width: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: white; /* El QR necesita contraste */
+    background-color: white;
     padding: 10px;
     flex-shrink: 0;
 }
 
-/* ESTADO DEL TICKET (Badge) */
+
 .ticket-status {
     display: inline-block;
     padding: 4px 10px;
@@ -687,12 +681,11 @@ body {
 .status-valid { background-color: rgba(0, 184, 148, 0.2); color: #00b894; border: 1px solid #00b894;}
 .status-used { background-color: rgba(255, 255, 255, 0.1); color: #b2bec3; border: 1px solid #636e72;}
 
-/* Responsive para tickets */
+
 @media (max-width: 768px) {
     .ticket-card-real { flex-direction: column; height: auto; }
     .ticket-left { border-right: none; border-bottom: 2px dashed #3f3f46; }
     .ticket-right { width: 100%; padding: 20px; }
-    /* Ajuste agujeros */
     .ticket-left::after, .ticket-left::before { right: auto; left: -10px; } /* Simplificado para móvil */
 }
 
@@ -708,7 +701,7 @@ body {
 }
 
 .stat-card {
-    background: #2a2a35; /* Adaptado al modo oscuro */
+    background: #2a2a35;
     border-radius: 10px;
     padding: 20px;
     display: flex;
@@ -813,7 +806,7 @@ body {
    MENÚ RESPONSIVO (MÓVIL)
    ========================================= */
 
-/* Botón de hamburguesa (oculto por defecto en PC) */
+
 .menu-toggle {
     display: none;
     flex-direction: column;
@@ -835,11 +828,11 @@ body {
 
 @media (max-width: 768px) {
     .menu-toggle {
-        display: flex; /* Aparece en móviles */
+        display: flex;
     }
 
     .nav-links {
-        display: none; /* Se oculta el menú horizontal */
+        display: none;
         flex-direction: column;
         position: absolute;
         top: 70px;
@@ -851,7 +844,7 @@ body {
         box-shadow: 0 10px 15px rgba(0,0,0,0.5);
     }
 
-    /* Clase que se activa al hacer clic en la hamburguesa */
+
     .nav-links.active {
         display: flex;
         animation: fadeInDown 0.3s ease forwards;
@@ -875,7 +868,7 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Estilo para el botón de categoría activo */
+
 .cat-btn.active {
     background-color: #ff4757 !important;
     color: white !important;

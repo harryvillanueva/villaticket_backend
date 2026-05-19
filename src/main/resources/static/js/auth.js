@@ -47,13 +47,13 @@ const Auth = {
                     linkAdmin.style.display = 'block';
                     linkAdmin.href = 'dashboard-admin.html';
                     linkAdmin.textContent = 'Panel Súper Admin';
-                    linkAdmin.style.background = '#8b5cf6'; // Color Morado para diferenciar
+                    linkAdmin.style.background = '#8b5cf6';
                     linkAdmin.style.color = '#ffffff';
                 } else if (rol.includes('VENDEDOR')) {
                     linkAdmin.style.display = 'block';
                     linkAdmin.href = 'dashboard-vendedor.html';
                     linkAdmin.textContent = 'Panel Vendedor';
-                    linkAdmin.style.background = '#60a5fa'; // Color Azul por defecto
+                    linkAdmin.style.background = '#60a5fa';
                     linkAdmin.style.color = '#ffffff';
                 } else {
                     linkAdmin.style.display = 'none';
@@ -76,7 +76,7 @@ const Auth = {
     }
 };
 
-// Exponer Auth globalmente para que no haya errores de ReferenceError
+
 window.Auth = Auth;
 
 document.addEventListener('DOMContentLoaded', () => {

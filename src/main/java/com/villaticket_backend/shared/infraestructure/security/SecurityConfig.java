@@ -57,7 +57,7 @@ public class SecurityConfig {
                                 "/api/tickets/validar/**"
                         ).hasAnyAuthority("VENDEDOR", "ROLE_VENDEDOR")
 
-                        // 5. Rutas EXCLUSIVAS de Súper Admin (Corregido para coincidir con tu BD)
+                        // 5. Rutas EXCLUSIVAS de Súper Admin
                         .requestMatchers("/api/admin/**").hasAnyAuthority("SUPER_ADMIN", "ROLE_SUPER_ADMIN")
 
                         // 6. Cualquier otra petición requiere autenticación

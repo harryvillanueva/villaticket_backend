@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. VERIFICACIÓN DE SEGURIDAD (Evitar el bucle infinito)
     if (!Auth.estaAutenticado()) {
         console.warn("No hay sesión activa. Redirigiendo...");
-        // Codificamos la URL para evitar problemas con caracteres especiales
         const currentPath = window.location.pathname.split('/').pop() || 'escaner.html';
         window.location.href = `login.html?redirect=${encodeURIComponent(currentPath)}`;
         return;
@@ -17,11 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDetails = document.getElementById('resultDetails');
     const btnContinuar = document.getElementById('btnContinuar');
 
-    /**
-     * Lógica al detectar un QR
-     */
+
+    //Lógica al detectar un QR
+
     const onScanSuccess = async (decodedText) => {
-        // Pausar para no procesar múltiples veces el mismo código
         html5QrCode.pause();
 
         resultBox.style.display = 'block';
@@ -68,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 2. INICIO DE CÁMARA
-    // Importante: facingMode "environment" usa la cámara trasera
     const config = { fps: 15, qrbox: { width: 250, height: 250 } };
 
     html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)

@@ -15,7 +15,7 @@ public class RegisterUser {
     private IUsuarioRepository usuarioRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Inyectado desde tu SecurityConfig
+    private PasswordEncoder passwordEncoder;
 
     public Usuario run(RegisterUserRequest request) {
         if (usuarioRepository.existsByEmail(request.getEmail())) {
@@ -24,18 +24,10 @@ public class RegisterUser {
 
         Usuario usuario = new Usuario();
         usuario.setEmail(request.getEmail());
-
-        // Encriptar la contraseña (CRÍTICO)
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-
         usuario.setNombre(request.getNombre());
-
-        // Asignamos el nombre del rol ('CLIENTE' o 'VENDEDOR') que viene del JSON
-        // El Mapper se encargará de buscar el ID en la BD al guardar.
         usuario.setRolNombre(request.getRol());
-
         usuario.setFechaRegistro(LocalDateTime.now());
-
         return usuarioRepository.save(usuario);
     }
 }

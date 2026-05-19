@@ -9,7 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Mapea la ruta web "/uploads/..." a la carpeta física "uploads/" de tu ordenador
+        // Mapea la ruta web "/uploads/..." a la carpeta física "uploads/"
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:uploads/");
     }

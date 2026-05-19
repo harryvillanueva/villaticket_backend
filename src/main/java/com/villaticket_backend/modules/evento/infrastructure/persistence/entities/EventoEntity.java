@@ -27,32 +27,32 @@ public class EventoEntity {
     private String ubicacion;
 
     @Column(nullable = false)
-    private String estado; // EJ: "BORRADOR", "PUBLICADO", "CANCELADO"
+    private String estado;
 
     @Column(length = 500)
     private String imagen;
 
-    // Relación con Categoría
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
     private CategoriaEntity categoria;
 
-    // Relación con el Vendedor (Usuario)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = false)
     private UsuarioEntity vendedor;
 
     @Column(columnDefinition = "TEXT")
-    private String descripcion; // Nuevo: El cuerpo del evento
+    private String descripcion;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "evento_galeria", joinColumns = @JoinColumn(name = "evento_id"))
     @Column(name = "imagen_url")
-    private List<String> galeria; // Nuevo: Lista de URLs para la galería
+    private List<String> galeria;
 
     public EventoEntity() {}
 
-    // Getters y Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getTitulo() { return titulo; }

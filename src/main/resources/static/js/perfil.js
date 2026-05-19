@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const inputIban = document.getElementById('perfilIban');
     const userAvatarMenu = document.getElementById('userAvatarMenu');
 
-    // Asignación de IDs dinámicos para los botones de envío si no los tienen
+
     const btnPerfil = document.querySelector('#perfilForm button[type="submit"]');
     if (btnPerfil && !btnPerfil.id) btnPerfil.id = 'btnGuardarPerfil';
 

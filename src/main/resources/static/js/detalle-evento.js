@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Mostramos el contenedor de detalles siempre
+        // Mostramos el contenedor de detalles
         if(loadingDiv) loadingDiv.style.display = 'none';
         if(contenidoDiv) contenidoDiv.style.display = 'block';
 
@@ -70,10 +70,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- LÓGICA DE BLOQUEO DE COMPRA SI HA CADUCADO ---
     if (estaCaducado) {
-        // Buscamos el contenedor del formulario de compra (booking-body)
         const bookingBody = document.querySelector('.booking-body');
         if (bookingBody) {
-            // Reemplazamos todo el contenido del formulario por un aviso de evento finalizado
             bookingBody.innerHTML = `
                 <div style="background: rgba(255, 71, 87, 0.1); color: #ff4757; padding: 20px; border: 1px solid #ff4757; border-radius: 8px; text-align: center;">
                     <span class="material-icons-outlined" style="font-size: 40px; margin-bottom: 10px;">event_busy</span>
@@ -83,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
             `;
         }
-        return; // Salimos de la función aquí para no cargar zonas ni listeners
+        return;
     }
 
     // 2. Cargar las zonas (Solo si el evento NO ha caducado)
@@ -189,7 +187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 listaAsistentes.push({ nombre: nombre, documento: documento });
             }
 
-            // Cambiamos el bloqueo manual por el spinner
             toggleSpinner('btnComprar', true);
 
             try {

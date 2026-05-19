@@ -11,12 +11,11 @@ public class LoginResponse {
         this.rol = rol;
     }
 
-    // Getters
+
     public String getToken() { return token; }
     public String getEmail() { return email; }
     public String getRol() { return rol; }
 
-    // Setters
     public void setToken(String token) { this.token = token; }
     public void setEmail(String email) { this.email = email; }
     public void setRol(String rol) { this.rol = rol; }

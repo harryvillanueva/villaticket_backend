@@ -41,7 +41,7 @@ public class ObtenerEvento {
             dto.setCategoriaNombre("Sin categoría");
         }
 
-        // --- NUEVO: Extraer la galería de imágenes ---
+
         List<ImagenEventoEntity> imagenes = imagenEventoRepository.findByEvento_IdOrderByOrdenAsc(id);
         List<String> galeriaUrls = new ArrayList<>();
         for (ImagenEventoEntity img : imagenes) {

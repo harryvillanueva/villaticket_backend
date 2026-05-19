@@ -53,7 +53,7 @@ async function fetchAPI(endpoint, method = 'GET', body = null) {
     }
 }
 
-// --- NUEVAS FUNCIONES DE UI ---
+
 window.showToast = function(message, type = 'success') {
     let container = document.getElementById('toast-container');
     if (!container) {

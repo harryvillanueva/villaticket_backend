@@ -24,8 +24,6 @@ public class ProcesarCompra {
     @Autowired private JpaEventoRepository eventoRepository;
     @Autowired private JpaZonaRepository zonaRepository;
     @Autowired private JpaTicketRepository ticketRepository;
-
-    // Inyectamos nuestras nuevas herramientas
     @Autowired private GenerarTicketPdf generarTicketPdf;
     @Autowired private EmailService emailService;
 
@@ -51,13 +49,11 @@ public class ProcesarCompra {
             throw new RuntimeException("No hay suficientes entradas disponibles en esta zona.");
         }
 
-        // Restar stock
+
         zona.setCapacidadActual(zona.getCapacidadActual() - cantidadAComprar);
         zonaRepository.save(zona);
 
         List<TicketDTO> ticketsComprados = new ArrayList<>();
-
-        // Un mapa temporal para guardar los PDFs antes de enviarlos
         Map<String, byte[]> pdfsGenerados = new HashMap<>();
 
         for (CompraRequest.AsistenteDTO asistente : request.getAsistentes()) {
@@ -87,20 +83,12 @@ public class ProcesarCompra {
 
             ticketsComprados.add(dto);
 
-            // --- NUEVO: GENERAR EL PDF EN MEMORIA ---
-            // Llamamos a nuestra clase generadora pasándole el ID recién creado
             byte[] pdfBytes = generarTicketPdf.ejecutar(ticketGuardado.getId());
-
-            // Creamos un nombre limpio para el archivo PDF
             String nombreArchivo = "Ticket_" + asistente.getNombre().replace(" ", "_") + ".pdf";
-
-            // Lo guardamos en el mapa temporal
             pdfsGenerados.put(nombreArchivo, pdfBytes);
         }
 
-        // --- NUEVO: ENVIAR EL CORREO EN SEGUNDO PLANO ---
-        // Lo envolvemos en un hilo nuevo (Thread) para que el servidor responda rápido
-        // a la página web, y el envío del correo se procese de fondo sin hacer esperar al usuario.
+
         new Thread(() -> {
             emailService.enviarCorreoConTickets(usuario.getEmail(), evento.getTitulo(), pdfsGenerados);
         }).start();

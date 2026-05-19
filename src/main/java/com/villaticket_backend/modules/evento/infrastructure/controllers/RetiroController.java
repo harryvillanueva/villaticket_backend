@@ -47,7 +47,7 @@ public class RetiroController {
             }
         }
 
-        double saldoNeto = ingresosTotales * 0.90; // Descontamos 10% de comisión
+        double saldoNeto = ingresosTotales * 0.90;
 
         List<RetiroEntity> retiros = retiroRepository.findByVendedor(vendedor);
         double retirado = 0.0;

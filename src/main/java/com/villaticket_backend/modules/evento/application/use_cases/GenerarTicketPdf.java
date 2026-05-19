@@ -66,7 +66,7 @@ public class GenerarTicketPdf {
             Image qrImage = new Image(ImageDataFactory.create(qrBaos.toByteArray()));
             qrImage.setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.CENTER);
 
-            document.add(new Paragraph("\n")); // Espacio
+            document.add(new Paragraph("\n"));
             document.add(qrImage);
 
             document.add(new Paragraph(ticket.getCodigoQr())

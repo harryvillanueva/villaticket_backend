@@ -12,7 +12,7 @@ async function cargarTodoElPanel() {
     await cargarRetirosAdmin();
     await cargarCategorias();
     await cargarEventos();
-    await cargarUsuarios(); // <-- AÑADIDO: Llama a la carga de usuarios
+    await cargarUsuarios();
 }
 
 // --- 1. ESTADÍSTICAS GLOBALES ---
@@ -71,7 +71,7 @@ async function aprobarRetiro(id) {
     try {
         await fetchAPI(`/admin/retiros/${id}/aprobar`, 'PUT');
         showToast("Retiro aprobado exitosamente.", "success");
-        cargarTodoElPanel(); // Refrescar todo el panel
+        cargarTodoElPanel();
     } catch (error) {
         showToast("Error al aprobar: " + error.message, "error");
     }
@@ -184,9 +184,7 @@ async function cancelarEvento(id) {
     }
 }
 
-// ==========================================
 // --- 5. GESTIÓN DE USUARIOS (NUEVO) ---
-// ==========================================
 async function cargarUsuarios() {
     const tabla = document.getElementById('tablaUsuarios');
     if (!tabla) return;
@@ -202,11 +200,9 @@ async function cargarUsuarios() {
         }
 
         usuarios.forEach(u => {
-            // Etiquetas visuales para el estado
             let estadoHtml = u.activo ? '<span class="badge badge-publicado">ACTIVO</span>' : '<span class="badge badge-cancelado">BLOQUEADO</span>';
             let botonAccion = '';
 
-            // Lógica de botones: No permitimos que un Admin se bloquee a sí mismo visualmente
             if (u.rol === 'ADMIN') {
                 botonAccion = '<span style="color: #888; font-size: 0.9rem;">Súper Admin</span>';
             } else if (u.activo) {
@@ -236,7 +232,7 @@ async function bloquearUsuario(id) {
     try {
         await fetchAPI(`/admin/usuarios/${id}/bloquear`, 'PUT');
         showToast("Usuario bloqueado exitosamente.", "success");
-        cargarUsuarios(); // Refrescar solo la tabla de usuarios
+        cargarUsuarios();
     } catch (error) {
         showToast("Error al bloquear: " + error.message, "error");
     }
@@ -247,7 +243,7 @@ async function activarUsuario(id) {
     try {
         await fetchAPI(`/admin/usuarios/${id}/activar`, 'PUT');
         showToast("Usuario activado exitosamente.", "success");
-        cargarUsuarios(); // Refrescar solo la tabla de usuarios
+        cargarUsuarios();
     } catch (error) {
         showToast("Error al activar: " + error.message, "error");
     }

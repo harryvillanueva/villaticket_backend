@@ -21,13 +21,13 @@ public class TicketEntity {
     @Column(nullable = false)
     private String estado;
 
-    // --- NUEVOS CAMPOS NOMINATIVOS ---
+
     @Column(nullable = false)
     private String nombreAsistente;
 
     @Column(nullable = false)
     private String documentoAsistente;
-    // ---------------------------------
+
 
     @ManyToOne
     @JoinColumn(name = "evento_id", nullable = false)
@@ -43,7 +43,7 @@ public class TicketEntity {
 
     public TicketEntity() {}
 
-    // Getters y Setters
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getCodigoQr() { return codigoQr; }

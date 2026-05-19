@@ -11,7 +11,6 @@ public class CambiarPasswordRequest {
         this.passwordNueva = passwordNueva;
     }
 
-    // Getters y Setters
     public String getPasswordActual() { return passwordActual; }
     public void setPasswordActual(String passwordActual) { this.passwordActual = passwordActual; }
 

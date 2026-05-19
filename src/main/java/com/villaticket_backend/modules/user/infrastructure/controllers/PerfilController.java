@@ -52,8 +52,6 @@ public class PerfilController {
         }
 
         usuarioRepository.save(usuario);
-
-        // --- CORRECCIÓN: Devolvemos un JSON real ---
         return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
     }
 

@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Verificación de seguridad inicial
     if (!Auth.estaAutenticado()) {
         window.location.href = 'login.html';
         return;
@@ -27,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) throw new Error(`Error en el servidor: ${response.status}`);
 
             const tickets = await response.json();
-            gridTickets.innerHTML = ''; // Limpiar cargador
+            gridTickets.innerHTML = '';
 
             if (!tickets || tickets.length === 0) {
                 gridTickets.innerHTML = `
@@ -78,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 gridTickets.appendChild(cardWrapper);
 
-                // Generar QR en el navegador (solo para visualización rápida)
+                // Generar QR en el navegador
                 new QRCode(document.getElementById(`qr-${ticket.id}`), {
                     text: ticket.codigoQr,
                     width: 120,
@@ -99,7 +98,6 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     window.descargarPDF = async (ticketId, nombreAsistente) => {
         try {
-            // Cambiar texto del botón momentáneamente
             const btn = event.currentTarget;
             const textoOriginal = btn.innerHTML;
             btn.innerHTML = "<span>⏳</span> Generando...";
@@ -108,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const token = Auth.obtenerToken();
             const baseUrl = typeof API_URL !== 'undefined' ? API_URL : 'http://localhost:8080/api';
 
-            // Petición al endpoint de Java
+
             const response = await fetch(`${baseUrl}/compras/ticket/${ticketId}/pdf`, {
                 method: 'GET',
                 headers: {
@@ -117,8 +115,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             if (!response.ok) throw new Error("No se pudo generar el PDF en el servidor");
-
-            // Recibimos el archivo como un BLOB (Binary Large Object)
             const blob = await response.blob();
 
             // Creamos un link invisible para forzar la descarga
@@ -128,8 +124,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             a.download = `Ticket_Villaticket_${nombreAsistente.replace(/\s+/g, '_')}.pdf`;
             document.body.appendChild(a);
             a.click();
-
-            // Limpieza
             a.remove();
             window.URL.revokeObjectURL(url);
 
@@ -143,12 +137,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // Configuración del botón de cierre de sesión
+
     document.getElementById('btnCerrarSesion')?.addEventListener('click', (e) => {
         e.preventDefault();
         Auth.cerrarSesion();
     });
 
-    // Iniciar carga
     cargarTickets();
 });

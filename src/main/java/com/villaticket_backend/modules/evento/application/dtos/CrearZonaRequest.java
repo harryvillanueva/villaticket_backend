@@ -13,7 +13,7 @@ public class CrearZonaRequest {
     @NotBlank(message = "El nombre de la zona es obligatorio.")
     private String nombre;
 
-    // Se mantiene el nombre, pero sin validación obligatoria para evitar el error 400
+
     private Integer capacidad;
 
     @NotNull(message = "El precio es obligatorio.")
